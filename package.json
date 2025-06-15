@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/zeroaltitude/tictactoe-server/issues"
   },
-  "homepage": "https://github.com/zeroaltitude/tictactoe-server#readme"
+  "homepage": "https://github.com/zeroaltitude/tictactoe-server#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
 }
