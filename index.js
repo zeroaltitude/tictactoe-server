@@ -6,6 +6,7 @@ const fs = require('fs');
 const GAMEIDLEN = 6;
 
 // Enable CORS with the defined options
+app.use(express.json());
 app.use(cors()); // Apply the CORS middleware with specific options
 
 //app.use(express.json());
@@ -57,7 +58,7 @@ app.put("/game/:game_id", (req, res) => {
     const game = JSON.parse(fs.readFileSync(`state/games/${req.params.game_id}.json`, (err, data) => {
         if (err) throw err;
     }));
-    console.log(req);
+    console.log("!!!!!!!", req);
     const body = req.body;
     const action = body.action;
     switch (action) {
