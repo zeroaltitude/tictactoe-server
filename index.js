@@ -8,6 +8,8 @@ const GAMEIDLEN = 6;
 // Enable CORS with the defined options
 app.use(cors()); // Apply the CORS middleware with specific options
 
+//app.use(express.json());
+
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });
@@ -26,7 +28,8 @@ app.post("/games", (req, res) => {
         "moves": [],
         "gameID": newGame,
         "playerX": "",
-        "playerO": ""
+        "playerO": "",
+        "gameStarted":false
     });
     fs.writeFile(`state/games/${newGame}.json`, content, (err) => {
         if (err) {
@@ -54,6 +57,7 @@ app.put("/game/:game_id", (req, res) => {
     const game = JSON.parse(fs.readFileSync(`state/games/${req.params.game_id}.json`, (err, data) => {
         if (err) throw err;
     }));
+    console.log(req);
     const body = req.body;
     const action = body.action;
     switch (action) {
@@ -69,9 +73,11 @@ app.put("/game/:game_id", (req, res) => {
             }
             else if (game.playerX === '') {
                 game.playerX = playerName;
+                game.gameStarted = true;
             }
             else if (game.playerO === '') {
                 game.playerO = playerName;
+                game.gameStarted = true;
             }
             else {
                 res.json({
