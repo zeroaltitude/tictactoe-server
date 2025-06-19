@@ -46,7 +46,6 @@ app.post("/games", (req, res) => {
 });
 
 app.get("/game/:game_id", (req, res) => {
-    console.log(`state/games/${req.params.game_id}.json`)
     fs.readFile(`state/games/${req.params.game_id}.json`, (err, data) => {
         if (err) throw err;
         const game = JSON.parse(data);
@@ -58,7 +57,6 @@ app.put("/game/:game_id", (req, res) => {
     const game = JSON.parse(fs.readFileSync(`state/games/${req.params.game_id}.json`, (err, data) => {
         if (err) throw err;
     }));
-    console.log("!!!!!!!", req);
     const body = req.body;
     const action = body.action;
     switch (action) {
