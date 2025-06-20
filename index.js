@@ -30,7 +30,8 @@ app.post("/games", (req, res) => {
         "gameID": newGame,
         "playerX": "",
         "playerO": "",
-        "gameStarted":false
+        "gameStarted": false,
+        "currentPlayer": "X"
     });
     fs.writeFile(`state/games/${newGame}.json`, content, (err) => {
         if (err) {
@@ -54,6 +55,7 @@ app.get("/game/:game_id", (req, res) => {
 });
 
 app.put("/game/:game_id", (req, res) => {
+    let playerIdentifier = '';
     const game = JSON.parse(fs.readFileSync(`state/games/${req.params.game_id}.json`, (err, data) => {
         if (err) throw err;
     }));
@@ -65,18 +67,22 @@ app.put("/game/:game_id", (req, res) => {
             if (game.playerX === '' && game.playerO === '') {
                 if (Math.random >= .5) {
                     game.playerX = playerName;
+                    playerIdentifier = 'X';
                 }
                 else {
                     game.playerO = playerName;
+                    playerIdentifier = 'O';
                 }
             }
             else if (game.playerX === '') {
                 game.playerX = playerName;
                 game.gameStarted = true;
+                playerIdentifier = 'X';
             }
             else if (game.playerO === '') {
                 game.playerO = playerName;
                 game.gameStarted = true;
+                playerIdentifier = 'O';
             }
             else {
                 res.json({
@@ -84,6 +90,9 @@ app.put("/game/:game_id", (req, res) => {
                 });
                 return;
             }
+            res.json({
+                "playerIdentifier": playerIdentifier
+            });
             break;
         case "move":
             if (game.playerX === '' || game.playerO === '') {
@@ -92,7 +101,10 @@ app.put("/game/:game_id", (req, res) => {
                 });
                 return;
             }
+            console.log(game.currentPlayer);
             game.moves.push(body.move);
+            game.currentPlayer = body.newPlayer;
+            console.log(game.currentPlayer);
             break;
         default:
             res.json({
