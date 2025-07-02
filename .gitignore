@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# game files
+state/games/*.json
+
 # C extensions
 *.so
 
