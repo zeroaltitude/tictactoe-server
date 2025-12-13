@@ -99,6 +99,11 @@ app.put("/game/:game_id", (req, res) => {
                     game.gameStarted = true;
                     playerIdentifier = 'O';
                 }
+                else if (playerName === game.playerX || playerName === game.playerO) {
+                    res.json({
+                        "response": "already started"
+                    });
+                }
                 else {
                     res.json({
                         "response":"game is full"
@@ -117,7 +122,10 @@ app.put("/game/:game_id", (req, res) => {
                     return;
                 }
                 console.log(game.currentPlayer);
-                game.moves.push(body.move);
+                console.log(body.move, "||", game.moves);
+                if (!(((game.moves[game.moves.length-1])??['a','b']).join()==body.move.join())) {
+                    game.moves.push(body.move);
+                }
                 game.currentPlayer = body.newPlayer;
                 console.log(game.currentPlayer);
                 break;
