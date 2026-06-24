@@ -31,7 +31,6 @@ app.post("/games", (req, res) => {
         "playerX": "",
         "playerO": "",
         "gameStarted": false,
-        "currentPlayer": "X"
     });
     fs.writeFile(`state/games/${newGame}.json`, content, (err) => {
         if (err) {
@@ -126,7 +125,6 @@ app.put("/games/:game_id", (req, res) => {
                 if (!(((game.moves[game.moves.length-1])??['a','b']).join()==body.move.join())) {
                     game.moves.push(body.move);
                 }
-                game.currentPlayer = body.newPlayer;
                 console.log(game.currentPlayer);
                 break;
             default:
