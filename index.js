@@ -46,7 +46,7 @@ app.post("/games", (req, res) => {
     });
 });
 
-app.get("/game/:game_id", (req, res) => {
+app.get("/games/:game_id", (req, res) => {
     fs.readFile(`state/games/${req.params.game_id}.json`, (err, data) => {
         if (err) {
             res.json({'error':err})
@@ -58,7 +58,7 @@ app.get("/game/:game_id", (req, res) => {
     });
 });
 
-app.put("/game/:game_id", (req, res) => {
+app.put("/games/:game_id", (req, res) => {
     let playerIdentifier = '';
     let game;
     try {
