@@ -100,7 +100,8 @@ app.put("/games/:game_id", (req, res) => {
                 }
                 else if (playerName === game.playerX || playerName === game.playerO) {
                     res.json({
-                        "response": "already started"
+                        "response": "already started",
+                        "playerIdentifier": ((playerName === game.playerX) ? 'X' : 'O')
                     });
                 }
                 else {
