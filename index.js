@@ -89,12 +89,13 @@ app.put("/games/:game_id", (req, res) => {
                     }
                 }
                 else if (game.playerX === '') {
-                    game.playerX = playerName;
+                    // set player name (duplicate name support)
+                    game.playerX = game.playerO === playerName ? `${playerName}(1)` : playerName;
                     game.gameStarted = true;
                     playerIdentifier = 'X';
                 }
                 else if (game.playerO === '') {
-                    game.playerO = playerName;
+                    game.playerO = game.playerX === playerName ? `${playerName}(1)` : playerName;
                     game.gameStarted = true;
                     playerIdentifier = 'O';
                 }
