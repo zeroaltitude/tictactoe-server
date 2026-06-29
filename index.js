@@ -24,15 +24,16 @@ app.get("/games", (req, res) => {
 });
 
 app.post("/games", (req, res) => {
-    const newGame = String(Math.floor(Math.random() * (10 ** GAMEIDLEN))).padStart(GAMEIDLEN,'0');
+    const newGameId = String(Math.floor(Math.random() * (10 ** GAMEIDLEN))).padStart(GAMEIDLEN,'0');
     const content = JSON.stringify({
         "moves": [],
-        "gameID": newGame,
+        "gameID": newGameId,
         "playerX": "",
         "playerO": "",
         "gameStarted": false,
+        "gameDimension": req.body.gameDimension
     });
-    fs.writeFile(`state/games/${newGame}.json`, content, (err) => {
+    fs.writeFile(`state/games/${newGameId}.json`, content, (err) => {
         if (err) {
             console.error("file failed", err);
         }
@@ -41,7 +42,7 @@ app.post("/games", (req, res) => {
         }
     });
     res.json({
-        "gameID": newGame
+        "gameID": newGameId
     });
 });
 
@@ -102,7 +103,8 @@ app.put("/games/:game_id", (req, res) => {
                 else if (playerName === game.playerX || playerName === game.playerO) {
                     res.json({
                         "response": "already started",
-                        "playerIdentifier": ((playerName === game.playerX) ? 'X' : 'O')
+                        "playerIdentifier": ((playerName === game.playerX) ? 'X' : 'O'),
+                        "gameDimension": game.gameDimension
                     });
                 }
                 else {
@@ -112,7 +114,8 @@ app.put("/games/:game_id", (req, res) => {
                     return;
                 }
                 res.json({
-                    "playerIdentifier": playerIdentifier
+                    "playerIdentifier": playerIdentifier,
+                    "gameDimension": game.gameDimension
                 });
                 break;
             case "move":
