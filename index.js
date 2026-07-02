@@ -31,7 +31,8 @@ app.post("/games", (req, res) => {
         "playerX": "",
         "playerO": "",
         "gameStarted": false,
-        "gameDimension": req.body.gameDimension
+        "gameDimension": req.body.gameDimension,
+        "playerWhoRequestedSkip": ''
     });
     fs.writeFile(`state/games/${newGameId}.json`, content, (err) => {
         if (err) {
@@ -132,12 +133,45 @@ app.put("/games/:game_id", (req, res) => {
                 }
                 console.log(game.currentPlayer);
                 break;
+            case "undoMove":
+                console.log(body.playerWhoRequestedSkip, game.playerX, game.playerO)
+                if (!(body.playerWhoRequestedSkip === game.playerX || body.playerWhoRequestedSkip === game.playerO || body.playerWhoRequestedSkip === '')) {
+                    res.json({
+                        "response": `player who requested not in game`
+                    });
+                    break;
+                }
+                if (game.playerWhoRequestedSkip === '' || body.playerWhoRequestedSkip === game.playerWhoRequestedSkip) {
+                    game.playerWhoRequestedSkip = body.playerWhoRequestedSkip;
+                    res.json({
+                        "response": `skip requested`
+                    });
+                    break;
+                }
+                if (body.playerWhoRequestedSkip !== game.playerWhoRequestedSkip && body.playerWhoRequestedSkip !== '') {
+                    game.moves.pop();
+                    game.playerWhoRequestedSkip = '';
+                    res.json({
+                        "response": `move undone`
+                    });
+                    break;
+                }
+                res.json({
+                    "response": `skip denied`
+                });
+                break;
+            //THIS IS FOR DEBUGGING ONLY ~~ REMOVE LATER
+            case "setMoves":
+                game.moves = body.moves;
+                break;
             default:
                 res.json({
                     "response": `error action not recognized ${action}`
                 });
                 return;
+            
         }
+        console.log("writing to file")
         fs.writeFile(`state/games/${req.params.game_id}.json`,JSON.stringify(game), (err) => {
             if (err) {
                 console.error("move failed", err);
