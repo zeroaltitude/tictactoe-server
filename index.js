@@ -32,7 +32,7 @@ app.post("/games", (req, res) => {
         "playerO": "",
         "gameStarted": false,
         "gameDimension": req.body.gameDimension,
-        "playerWhoRequestedSkip": ''
+        "playerWhoRequestedUndo": ''
     });
     fs.writeFile(`state/games/${newGameId}.json`, content, (err) => {
         if (err) {
@@ -133,31 +133,45 @@ app.put("/games/:game_id", (req, res) => {
                 }
                 console.log(game.currentPlayer);
                 break;
+            // by far the worst code ive ever written tbh: 
             case "undoMove":
-                console.log(body.playerWhoRequestedSkip, game.playerX, game.playerO)
-                if (!(body.playerWhoRequestedSkip === game.playerX || body.playerWhoRequestedSkip === game.playerO || body.playerWhoRequestedSkip === '')) {
+                console.log(body.playerWhoRequestedUndo, game.playerX, game.playerO)
+                if (!(body.playerWhoRequestedUndo === game.playerX || body.playerWhoRequestedUndo === game.playerO || body.playerWhoRequestedUndo === '')) {
                     res.json({
                         "response": `player who requested not in game`
                     });
                     break;
                 }
-                if (game.playerWhoRequestedSkip === '' || body.playerWhoRequestedSkip === game.playerWhoRequestedSkip) {
-                    game.playerWhoRequestedSkip = body.playerWhoRequestedSkip;
+                if (game.playerWhoRequestedUndo === '' && (((body.playerWhoRequestedUndo === game.playerO) && game.moves.length % 2 === 1) || ((body.playerWhoRequestedUndo === game.playerX) && game.moves.length % 2 === 0))) {
                     res.json({
-                        "response": `skip requested`
+                        "response": `cannot undo opponents move`
                     });
                     break;
                 }
-                if (body.playerWhoRequestedSkip !== game.playerWhoRequestedSkip && body.playerWhoRequestedSkip !== '') {
+                if ((game.playerWhoRequestedUndo === '' || body.playerWhoRequestedUndo === game.playerWhoRequestedUndo) && body.confirmUndo === null) {
+                    game.playerWhoRequestedUndo = body.playerWhoRequestedUndo;
+                    res.json({
+                        "response": `undo requested`
+                    });
+                    break;
+                }
+                if (body.playerWhoRequestedUndo !== game.playerWhoRequestedUndo && body.confirmUndo === null) {
+                    //toggle off without confirming or unconfirming
+                    game.playerWhoRequestedUndo = '';
+                    res.json({
+                        "response": 'undo ask toggled off'
+                    })
+                    break;
+                }
+                if (body.playerWhoRequestedUndo !== game.playerWhoRequestedUndo && body.confirmUndo) {
                     game.moves.pop();
-                    game.playerWhoRequestedSkip = '';
                     res.json({
                         "response": `move undone`
                     });
                     break;
                 }
                 res.json({
-                    "response": `skip denied`
+                    "response": `undo denied`
                 });
                 break;
             //THIS IS FOR DEBUGGING ONLY ~~ REMOVE LATER
