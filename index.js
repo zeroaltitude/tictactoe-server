@@ -1,9 +1,11 @@
-const express = require('express');
-const cors = require('cors');
+import express from 'express';
+import cors from 'cors';
 const app = express();
 const port = 3030;
-const fs = require('fs');
+import fs from 'fs';
 const GAMEIDLEN = 6;
+
+import { Game } from './movevalidation.js';
 
 // Enable CORS with the defined options
 app.use(express.json());
@@ -24,54 +26,24 @@ app.get("/games", (req, res) => {
 });
 
 app.post("/games", (req, res) => {
-    const newGameId = String(Math.floor(Math.random() * (10 ** GAMEIDLEN))).padStart(GAMEIDLEN,'0');
-    const content = JSON.stringify({
-        "moves": [],
-        "gameID": newGameId,
-        "playerX": "",
-        "playerO": "",
-        "gameStarted": false,
-        "gameDimension": req.body.gameDimension,
-        "playerWhoRequestedUndo": ''
-    });
-    fs.writeFile(`state/games/${newGameId}.json`, content, (err) => {
-        if (err) {
-            console.error("file failed", err);
-        }
-        else {
-            console.log("succesffuclly created");
-        }
-    });
+    const newGameId = String(Math.floor(Math.random() * (10 ** GAMEIDLEN))).padStart(GAMEIDLEN, '0');
+    new Game(newGameId, req.body.gameDimension).save();
     res.json({
         "gameID": newGameId
     });
 });
 
 app.get("/games/:game_id", (req, res) => {
-    fs.readFile(`state/games/${req.params.game_id}.json`, (err, data) => {
-        if (err) {
-            res.json({'error':err})
-        }
-        else {
-            const game = JSON.parse(data);
-            res.json(game);
-        }
-    });
+    const session = new Game(req.params.game_id)
+    session.load()
+    res.json(session)
 });
 
 app.put("/games/:game_id", (req, res) => {
     let playerIdentifier = '';
-    let game;
-    try {
-        game = JSON.parse(fs.readFileSync(`state/games/${req.params.game_id}.json`, (err, data) => {
-            if (err) {
-                return {"error": "no such game"};
-            }
-        }));
-    } catch (e) {
-        game = {"error": e};
-    }
-    if (game.error) {
+    const game = new Game(req.params.game_id);
+    game.load();
+    if (game.isError()) {
         res.json(game);
     }
     else {
@@ -118,11 +90,14 @@ app.put("/games/:game_id", (req, res) => {
                     "playerIdentifier": playerIdentifier,
                     "gameDimension": game.gameDimension
                 });
+                console.log("writing to file")
+                console.log(game)
+                game.save();
                 break;
             case "move":
-                if (game.playerX === '' || game.playerO === '') {
+                if (!game.checkMoveValidity(body.move)) {
                     res.json({
-                        "response": "a player is missing"
+                        "error":"move is not valid"
                     });
                     return;
                 }
@@ -132,6 +107,9 @@ app.put("/games/:game_id", (req, res) => {
                     game.moves.push(body.move);
                 }
                 console.log(game.currentPlayer);
+                console.log("writing to file")    
+                console.log(game)    
+                game.save();
                 break;
             // by far the worst code ive ever written tbh: 
             case "undoMove":
@@ -177,23 +155,16 @@ app.put("/games/:game_id", (req, res) => {
             //THIS IS FOR DEBUGGING ONLY ~~ REMOVE LATER
             case "setMoves":
                 game.moves = body.moves;
+                console.log("writing to file")    
+                console.log(game)    
+                game.save();
                 break;
             default:
                 res.json({
                     "response": `error action not recognized ${action}`
                 });
-                return;
-            
+                return; 
         }
-        console.log("writing to file")
-        fs.writeFile(`state/games/${req.params.game_id}.json`,JSON.stringify(game), (err) => {
-            if (err) {
-                console.error("move failed", err);
-            }
-            else {
-                console.log("move successful");
-            }
-        });
         res.json(game);
     }
 });
