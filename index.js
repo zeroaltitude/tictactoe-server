@@ -101,14 +101,11 @@ app.put("/games/:game_id", (req, res) => {
                     });
                     return;
                 }
-                console.log(game.currentPlayer);
-                console.log(body.move, "||", game.moves);
                 if (!(((game.moves[game.moves.length-1])??['a','b']).join()==body.move.join())) {
                     game.moves.push(body.move);
                 }
-                console.log(game.currentPlayer);
-                console.log("writing to file")    
-                console.log(game)    
+                console.log("this is important:")
+                console.log(game.getPossibleResponses())
                 game.save();
                 break;
             // by far the worst code ive ever written tbh: 

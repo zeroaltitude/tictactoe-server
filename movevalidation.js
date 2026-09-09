@@ -2,6 +2,9 @@ import { getTreeNodeForCoords, calculateShift, checkWin, BoardTree, evaluateMove
 
 import fs from 'fs';
 
+import path from 'node:path';
+const ROOTGAMEDIR = path.join(import.meta.dirname, 'state', 'games');
+
 function flattenBoardTree(tree, layer, coordinates = '', flatBoard = {}) {
   coordinates += tree.row.toString()
   coordinates += tree.column.toString()
@@ -20,8 +23,24 @@ function flattenBoardTree(tree, layer, coordinates = '', flatBoard = {}) {
   return obj 
 }
 
+export function getAvailableMoves(board, moves) {
+    if (board.depth === 0 && board.wonBy === '') {
+        moves.push(board.parent.getFullRoute([board.row, board.column]))
+    }
+    else {
+        for (let row in board.children) {
+            for (let column in board.children[row]) {
+                if (board.children[row][column].isActive) {
+                    getAvailableMoves(board.children[row][column], moves)
+                }
+            }
+        }
+    }
+}
+
 export class Game {
     #error;
+    #maxDepth;
     constructor(gameID, gameDimension=1) {
         this.moves = [];
         this.gameID = gameID;
@@ -31,20 +50,27 @@ export class Game {
         this.gameDimension = gameDimension;
         this.playerWhoRequestedUndo = '';
         this.#error = false;
+        this.#maxDepth = 6;
         //this.board = new BoardTree(null,gameDimension,0,0);
     }
     load() {
-        const game = JSON.parse(fs.readFileSync(`state/games/${this.gameID}.json`, (err, data) => {
-            if (err) {
-                this.#error = true
-                console.error("load failed", err)
-            }
-        }));
+        const pathName = path.join(ROOTGAMEDIR, `${this.gameID}.json`);
+        const content = fs.readFileSync(pathName)
+        const cleanString = content.toString('utf8').replace(/^\uFEFF/, '');
+        let game;
+        try {
+            game = JSON.parse(cleanString);
+        }
+        catch (err) {
+            this.#error = true;
+            console.log("load failed", err)
+            return;
+        }
         Object.assign(this, game);
         return game;
     };
     save() {
-        fs.writeFileSync(`state/games/${this.gameID}.json`,JSON.stringify(this), (err) => {
+        fs.writeFileSync(path.join(ROOTGAMEDIR, `${this.gameID}.json`),JSON.stringify(this), (err) => {
             if (err) {
                 this.#error = true;
                 console.error("save failed", err);
@@ -62,13 +88,32 @@ export class Game {
         console.log(this.moves.length)
         evaluateMovesOnBoardTree(this.moves.slice(0, this.moves.length-1), board, true)
         evaluateMovesOnBoardTree(this.moves, board)
-        console.log("KLOOOKKSK")
-        console.log(getTreeNodeForCoords(board, move))
         const targetBoard = getTreeNodeForCoords(board, move);
         // isactive only applies to boards of depth 1 or higher so wonby check is necessary
         if (targetBoard.parent.isActive && targetBoard.wonBy === '') {
             return true
         }
         return false
+    }
+    getPossibleResponses() {
+        const board = new BoardTree(null, this.gameDimension, 0, 0)
+        evaluateMovesOnBoardTree(this.moves.slice(0, this.moves.length-1), board, true)
+        evaluateMovesOnBoardTree(this.moves, board)
+        let potentialMoves = []
+        getAvailableMoves(board, potentialMoves)
+        return potentialMoves;
+    }
+    getScoreOf(board, depth = 0) {
+        if (depth === this.#maxDepth) {
+            //score
+        }
+        else {
+            const possiblePlays = this.getPossibleResponses();
+            for (i in possiblePlays) {
+                //play this on the board -- idk how
+                possiblePlays[i]
+            }
+
+        }
     }
 }
