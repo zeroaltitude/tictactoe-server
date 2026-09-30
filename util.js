@@ -97,32 +97,35 @@ export function calculateShift(previousMove) {
   return pre.concat(suf);
 }
 
+export const evaluateMoveOnBoardTree = (currentMove, boardTree, serverQuery = false) => {
+  const playerCurrent = (boardTree.numOfMovesPlayed % 2 === 0) ? 'X' : 'O';
+  const treeNode = getTreeNodeForCoords(boardTree, currentMove.slice(0, currentMove.length - 2));
+  let currentBoard = treeNode;
+  let winDepth = 0;
+  let coords = [];
+  currentBoard.children[currentMove[currentMove.length - 2]][currentMove[currentMove.length - 1]].wonBy = playerCurrent;
+  while (checkWin(currentBoard)) {
+    coords = [currentBoard.row, currentBoard.column];
+    if (currentBoard.parent == null) {
+      boardTree.wonBy = playerCurrent;
+      alert(`${playerCurrent} won the game!`);
+      break;
+    }
+    currentBoard = currentBoard.parent;
+    //this line has changed according to "new standards":
+    currentBoard.children[coords[0]][coords[1]].wonBy = playerCurrent;
+    winDepth++;
+  }
+  boardTree.numOfMovesPlayed = boardTree.numOfMovesPlayed + 1;
+  getTreeNodeForCoords(boardTree, currentMove).wonBy = playerCurrent;
+  if (!serverQuery) {
+    boardTree.setActiveStatus(calculateShift([treeNode, currentMove[currentMove.length - 2], currentMove[currentMove.length - 1], winDepth]));
+  }
+}
+
 export const evaluateMovesOnBoardTree = (moveList, boardTree, serverQuery = false) => {
   for (let moveIndex = boardTree.numOfMovesPlayed; moveIndex < moveList.length; moveIndex++) {
-    const playerCurrent = (moveIndex % 2 === 0) ? 'X' : 'O';
-    const currentMove = moveList[moveIndex];
-    const treeNode = getTreeNodeForCoords(boardTree, moveList[moveIndex].slice(0, moveList[moveIndex].length - 2));
-    let currentBoard = treeNode;
-    let winDepth = 0;
-    let coords = [];
-    currentBoard.children[currentMove[currentMove.length - 2]][currentMove[currentMove.length - 1]].wonBy = playerCurrent;
-    while (checkWin(currentBoard)) {
-      coords = [currentBoard.row, currentBoard.column];
-      if (currentBoard.parent == null) {
-        boardTree.wonBy = playerCurrent;
-        alert(`${playerCurrent} won the game!`);
-        break;
-      }
-      currentBoard = currentBoard.parent;
-      //this line has changed according to "new standards":
-      currentBoard.children[coords[0]][coords[1]].wonBy = playerCurrent;
-      winDepth++;
-    }
-    boardTree.numOfMovesPlayed = boardTree.numOfMovesPlayed + 1;
-    getTreeNodeForCoords(boardTree, currentMove).wonBy = playerCurrent;
-    if (!serverQuery) {
-      boardTree.setActiveStatus(calculateShift([treeNode, currentMove[currentMove.length - 2], currentMove[currentMove.length - 1], winDepth]));
-    }
+    evaluateMoveOnBoardTree(moveList[moveIndex], boardTree, serverQuery = false)
   }
   return boardTree;
 }

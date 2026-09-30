@@ -1,4 +1,4 @@
-import { getTreeNodeForCoords, calculateShift, checkWin, BoardTree, evaluateMovesOnBoardTree } from './util.js';
+import { getTreeNodeForCoords, calculateShift, checkWin, BoardTree, evaluateMovesOnBoardTree, evaluateMoveOnBoardTree } from './util.js';
 
 import fs from 'fs';
 
@@ -23,7 +23,7 @@ function flattenBoardTree(tree, layer, coordinates = '', flatBoard = {}) {
   return obj 
 }
 
-export function getAvailableMoves(board, moves) {
+export function getAvailableMoves(board, moves = []) {
     if (board.depth === 0 && board.wonBy === '') {
         moves.push(board.parent.getFullRoute([board.row, board.column]))
     }
@@ -36,6 +36,7 @@ export function getAvailableMoves(board, moves) {
             }
         }
     }
+    return moves;
 }
 
 export class Game {
@@ -87,7 +88,7 @@ export class Game {
         const board = new BoardTree(null, this.gameDimension, 0, 0)
         console.log(this.moves.length)
         evaluateMovesOnBoardTree(this.moves.slice(0, this.moves.length-1), board, true)
-        evaluateMovesOnBoardTree(this.moves, board)
+        evaluateMoveOnBoardTree(this.moves[this.moves.length-1], board)
         const targetBoard = getTreeNodeForCoords(board, move);
         // isactive only applies to boards of depth 1 or higher so wonby check is necessary
         if (targetBoard.parent.isActive && targetBoard.wonBy === '') {
@@ -98,9 +99,8 @@ export class Game {
     getPossibleResponses() {
         const board = new BoardTree(null, this.gameDimension, 0, 0)
         evaluateMovesOnBoardTree(this.moves.slice(0, this.moves.length-1), board, true)
-        evaluateMovesOnBoardTree(this.moves, board)
-        let potentialMoves = []
-        getAvailableMoves(board, potentialMoves)
+        evaluateMoveOnBoardTree(this.moves[this.moves.length-1], board)
+        let potentialMoves = getAvailableMoves(board)
         return potentialMoves;
     }
     getScoreOf(board, depth = 0) {
