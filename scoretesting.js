@@ -1,5 +1,4 @@
 import { BoardTree } from "./util.js";
-//import { scorePossibleWins, getNextMove } from "./boardscoring.js";
 import { getNextMove } from "./montecarlotreesearch.js";
 
 const D2BOARD = {

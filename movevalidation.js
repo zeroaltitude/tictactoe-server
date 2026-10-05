@@ -96,24 +96,4 @@ export class Game {
         }
         return false
     }
-    getPossibleResponses() {
-        const board = new BoardTree(null, this.gameDimension, 0, 0)
-        evaluateMovesOnBoardTree(this.moves.slice(0, this.moves.length-1), board, true)
-        evaluateMoveOnBoardTree(this.moves[this.moves.length-1], board)
-        let potentialMoves = getAvailableMoves(board)
-        return potentialMoves;
-    }
-    getScoreOf(board, depth = 0) {
-        if (depth === this.#maxDepth) {
-            //score
-        }
-        else {
-            const possiblePlays = this.getPossibleResponses();
-            for (i in possiblePlays) {
-                //play this on the board -- idk how
-                possiblePlays[i]
-            }
-
-        }
-    }
 }

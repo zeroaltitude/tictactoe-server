@@ -104,8 +104,6 @@ app.put("/games/:game_id", (req, res) => {
                 if (!(((game.moves[game.moves.length-1])??['a','b']).join()==body.move.join())) {
                     game.moves.push(body.move);
                 }
-                console.log("this is important:")
-                console.log(game.getPossibleResponses())
                 game.save();
                 break;
             // by far the worst code ive ever written tbh: 
