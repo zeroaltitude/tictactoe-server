@@ -108,7 +108,7 @@ export const evaluateMoveOnBoardTree = (currentMove, boardTree, serverQuery = fa
     coords = [currentBoard.row, currentBoard.column];
     if (currentBoard.parent == null) {
       boardTree.wonBy = playerCurrent;
-      alert(`${playerCurrent} won the game!`);
+      //alert(`${playerCurrent} won the game!`);
       break;
     }
     currentBoard = currentBoard.parent;

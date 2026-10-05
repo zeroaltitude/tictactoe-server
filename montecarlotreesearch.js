@@ -24,7 +24,7 @@ function leafWalk(node, board) {
     }
     else {
         //server query to true unless 1 move away from reaching leaf
-        const chosenNode = node.children[Math.floor(CHILDCOUNT * Math.random())]
+        const chosenNode = node.children[Math.floor(node.children.length * Math.random())]
         evaluateMoveOnBoardTree(chosenNode.move, board);
         return leafWalk(chosenNode, board);
     }
@@ -33,11 +33,11 @@ function leafWalk(node, board) {
 function selectAndExpand(rootNode, rootBoard) {
     const leaf = leafWalk(rootNode, rootBoard);
     const possibleMoves = _.shuffle(getAvailableMoves(rootBoard));
-    const chosenMoves = possibleMoves.slice(CHILDCOUNT-1)
+    const chosenMoves = possibleMoves.slice(0, CHILDCOUNT)
     for (const chosenMove of chosenMoves) {
         leaf.children.push(new MonteCarloTree(rootNode.player, leaf, chosenMove))
     }
-    return leaf.children[Math.floor(CHILDCOUNT * Math.random())]
+    return leaf.children[Math.floor(chosenMoves.length * Math.random())]
 }
 
 function simulate(board) {
@@ -46,8 +46,13 @@ function simulate(board) {
     }
     else {
         const possibleMoves = getAvailableMoves(board);
-        evaluateMoveOnBoardTree(possibleMoves[Math.floor(possibleMoves.length * Math.random())], board)
-        return simulate(board)
+        // if draw happens
+        if (possibleMoves.length === 0) {
+            return '-';
+        }
+        const chosenMove = possibleMoves[Math.floor(possibleMoves.length * Math.random())];
+        evaluateMoveOnBoardTree(chosenMove, board);
+        return simulate(board);
     }
 }
 
@@ -58,25 +63,28 @@ function backpropagate(leafNode, winIncrement) {
         return
     }
     else {
-        backpropagate(leafNode.parent, winIncrement === 0 ? 1 : 0)
+        backpropagate(leafNode.parent, winIncrement === 0.5 ? 0.5 : winIncrement === 0 ? 1 : 0)
     }
 }
 
 function executeRound(rootNode, board, currentPlayer) {
     const rootBoard = _.cloneDeep(board);
     const leaf = selectAndExpand(rootNode, rootBoard);
-    const simulatedWinner = simulate(leaf, rootBoard);
-    backpropagate(leaf, simulatedWinner === currentPlayer ? 1 : 0)
+    const simulatedWinner = simulate(rootBoard);
+    backpropagate(leaf, simulatedWinner === '-' ? 0.5 : simulatedWinner === currentPlayer ? 1 : 0)
 }
 
 function simulateGames(board, currentPlayer) {
     const rootNode = new MonteCarloTree(currentPlayer);
     const startTime = Math.floor(Date.now() / 1000)
+    let roundNum = 0;
     while (true) {
         if (Math.floor(Date.now() / 1000) - startTime > THINKINGDURATION) {
             break;
         }
+        console.log("round: " + roundNum)
         executeRound(rootNode, board, currentPlayer);
+        roundNum++;
     }
     const scores = {};
     rootNode.children.map((childNode) => { scores[childNode.move] = childNode.winCount / childNode.simulationCount });

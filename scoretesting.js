@@ -927,7 +927,13 @@ function main() {
     console.log(D2BOARD)
     console.log(objectToBoard(D2BOARD))
     //console.log(scorePossibleWins(D2BOARD))
-    console.log(getNextMove(objectToBoard(D2BOARD), 'O'))
+    const recommendedMoveList = [];
+    for (let i = 0; i < 10; i++) {
+        const recommendedMove = getNextMove(objectToBoard(D2BOARD), 'O')
+        recommendedMoveList.push(recommendedMove)
+        console.log(recommendedMove)
+    }
+    console.log(recommendedMoveList);
 } 
 
 main()
