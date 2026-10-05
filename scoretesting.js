@@ -1,5 +1,6 @@
 import { BoardTree } from "./util.js";
-import { scorePossibleWins, getNextMove } from "./boardscoring.js";
+//import { scorePossibleWins, getNextMove } from "./boardscoring.js";
+import { getNextMove } from "./montecarlotreesearch.js";
 
 const D2BOARD = {
     depth : 2,
@@ -925,7 +926,7 @@ function objectToBoard(boardObj, parentBoard = null) {
 function main() {
     console.log(D2BOARD)
     console.log(objectToBoard(D2BOARD))
-    console.log(scorePossibleWins(D2BOARD))
+    //console.log(scorePossibleWins(D2BOARD))
     console.log(getNextMove(objectToBoard(D2BOARD), 'O'))
 } 
 
