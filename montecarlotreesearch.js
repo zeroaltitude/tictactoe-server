@@ -77,14 +77,14 @@ function executeRound(rootNode, board, currentPlayer) {
 function simulateGames(board, currentPlayer) {
     const rootNode = new MonteCarloTree(currentPlayer);
     const startTime = Math.floor(Date.now() / 1000)
-    let roundNum = 0;
+    //let roundNum = 0;
     while (true) {
         if (Math.floor(Date.now() / 1000) - startTime > THINKINGDURATION) {
             break;
         }
-        console.log("round: " + roundNum)
+        //console.log("round: " + roundNum)
         executeRound(rootNode, board, currentPlayer);
-        roundNum++;
+        //roundNum++;
     }
     const scores = {};
     rootNode.children.map((childNode) => { scores[childNode.move] = childNode.winCount / childNode.simulationCount });
