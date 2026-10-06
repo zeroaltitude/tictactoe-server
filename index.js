@@ -95,12 +95,12 @@ app.put("/games/:game_id", (req, res) => {
                 game.save();
                 break;
             case "move":
-                if (!game.checkMoveValidity(body.move)) {
-                    res.json({
-                        "error":"move is not valid"
-                    });
-                    return;
-                }
+                //if (!game.checkMoveValidity(body.move)) {
+                //    res.json({
+                //        "error":"move is not valid"
+                //    });
+                //    return;
+                //}
                 if (!(((game.moves[game.moves.length-1])??['a','b']).join()==body.move.join())) {
                     game.moves.push(body.move);
                 }
