@@ -52,6 +52,7 @@ export class Game {
         this.playerWhoRequestedUndo = '';
         this.#error = false;
         this.#maxDepth = 6;
+        this.isComputerGame = false;
         //this.board = new BoardTree(null,gameDimension,0,0);
     }
     load() {
@@ -84,12 +85,15 @@ export class Game {
     isError() {
         return this.#error;
     }
-    checkMoveValidity(move) {
+    getBoardFromStoredMoves() {
         const board = new BoardTree(null, this.gameDimension, 0, 0)
-        console.log(this.moves.length)
         evaluateMovesOnBoardTree(this.moves.slice(0, this.moves.length-1), board, true)
-        evaluateMoveOnBoardTree(this.moves[this.moves.length-1], board)
-        const targetBoard = getTreeNodeForCoords(board, move);
+        evaluateMoveOnBoardTree(this.moves[this.moves.length - 1], board)
+        return board;
+    }
+    checkMoveValidity(move) {
+        console.log(this.moves.length)
+        const targetBoard = getTreeNodeForCoords(this.getBoardFromStoredMoves(), move);
         // isactive only applies to boards of depth 1 or higher so wonby check is necessary
         if (targetBoard.parent.isActive && targetBoard.wonBy === '') {
             return true

@@ -23,8 +23,18 @@ function leafWalk(node, board) {
         return node
     }
     else {
-        //server query to true unless 1 move away from reaching leaf
-        const chosenNode = node.children[Math.floor(node.children.length * Math.random())]
+        //server query to true unless 1 move away from reaching leaf 
+        const nodeScores = node.children.map((child) => { return child.simulationCount === 0 ? Infinity : ((child.winCount / child.simulationCount) + (Math.sqrt(Math.log(node.simulationCount) / child.simulationCount)))});
+        let max = nodeScores[0];
+        let indexOfMax = 0;
+        for (let i = 1; i < nodeScores.length; i++) {
+            if (nodeScores[i] > max) {
+                indexOfMax = i;
+                max = nodeScores[i];
+            }
+        }
+        // make equal max scores random???? maybe???/
+        const chosenNode = node.children[indexOfMax];
         evaluateMoveOnBoardTree(chosenNode.move, board);
         return leafWalk(chosenNode, board);
     }
@@ -32,12 +42,17 @@ function leafWalk(node, board) {
 
 function selectAndExpand(rootNode, rootBoard) {
     const leaf = leafWalk(rootNode, rootBoard);
-    const possibleMoves = _.shuffle(getAvailableMoves(rootBoard));
-    const chosenMoves = possibleMoves.slice(0, CHILDCOUNT)
-    for (const chosenMove of chosenMoves) {
-        leaf.children.push(new MonteCarloTree(rootNode.player, leaf, chosenMove))
+    const nextPlayer = leaf.player === 'O' ? 'X' : 'O';
+    const possibleMoves = getAvailableMoves(rootBoard);
+    //const chosenMoves = possibleMoves.slice(0, CHILDCOUNT)
+    // if draw happens
+    if (possibleMoves.length === 0) {
+        return leaf.parent.children[Math.floor(leaf.parent.children.length * Math.random())];
     }
-    return leaf.children[Math.floor(chosenMoves.length * Math.random())]
+    for (const possibleMove of possibleMoves) {
+        leaf.children.push(new MonteCarloTree(nextPlayer, leaf, possibleMove))
+    }
+    return leaf.children[Math.floor(possibleMoves.length * Math.random())];
 }
 
 function simulate(board) {
@@ -56,14 +71,14 @@ function simulate(board) {
     }
 }
 
-function backpropagate(leafNode, winIncrement) {
+function backpropagate(leafNode, winIncrement, simulatedWinner) {
     leafNode.winCount += winIncrement;
     leafNode.simulationCount += 1;
     if (leafNode.parent === null) {
         return
     }
     else {
-        backpropagate(leafNode.parent, winIncrement === 0.5 ? 0.5 : winIncrement === 0 ? 1 : 0)
+        backpropagate(leafNode.parent, winIncrement === 0.5 ? 0.5 : leafNode.player === simulatedWinner ? 1 : 0, simulatedWinner)
     }
 }
 
@@ -71,7 +86,7 @@ function executeRound(rootNode, board, currentPlayer) {
     const rootBoard = _.cloneDeep(board);
     const leaf = selectAndExpand(rootNode, rootBoard);
     const simulatedWinner = simulate(rootBoard);
-    backpropagate(leaf, simulatedWinner === '-' ? 0.5 : simulatedWinner === currentPlayer ? 1 : 0)
+    backpropagate(leaf, simulatedWinner === '-' ? 0.5 : leaf.player === simulatedWinner ? 0 : 1, simulatedWinner)
 }
 
 function simulateGames(board, currentPlayer) {

@@ -6,6 +6,7 @@ import fs from 'fs';
 const GAMEIDLEN = 6;
 
 import { Game } from './movevalidation.js';
+import { getNextMove } from './montecarlotreesearch.js';
 
 // Enable CORS with the defined options
 app.use(express.json());
@@ -51,6 +52,7 @@ app.put("/games/:game_id", (req, res) => {
         const action = body.action;
         switch (action) {
             case "join":
+                game.isComputerGame = false;
                 const playerName = body.playerName;
                 if (game.playerX === '' && game.playerO === '') {
                     if (Math.random() >= .5) {
@@ -104,6 +106,21 @@ app.put("/games/:game_id", (req, res) => {
                 if (!(((game.moves[game.moves.length-1])??['a','b']).join()==body.move.join())) {
                     game.moves.push(body.move);
                 }
+                if (game.isComputerGame) {
+                    game.moves.push((getNextMove(game.getBoardFromStoredMoves(), 'O')).split(',').map(Number));
+                }
+                game.save();
+                break;
+            case "playComputer":
+                const humanName = body.playerName;
+                game.playerX = "tictactimmy" === humanName ? `${humanName}(1)` : humanName;
+                game.playerO = "tictactimmy"
+                game.gameStarted = true
+                game.isComputerGame = true;
+                res.json({
+                    "playerIdentifier": 'X',
+                    "gameDimension": game.gameDimension
+                });
                 game.save();
                 break;
             // by far the worst code ive ever written tbh: 
