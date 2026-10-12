@@ -41,7 +41,7 @@ function leafWalk(node, board) {
         //}, []);
 
         // semi inefficient implementation where dead scores are just -1 so they are not chosen
-        const nodeScores = node.children.map((child) => {return child.isDead ? -1 : (child.simulationCount === 0 ? Infinity : ((child.winCount / child.simulationCount) + (Math.sqrt(Math.log(node.simulationCount) / child.simulationCount))))})
+        const nodeScores = node.children.map((child) => {return (child.simulationCount === 0 ? Infinity : ((child.winCount / child.simulationCount) + (Math.sqrt(Math.log(node.simulationCount) / child.simulationCount))))})
         let max = nodeScores[0];
         let indexOfMax = 0;
         for (let i = 1; i < nodeScores.length; i++) {
@@ -52,9 +52,6 @@ function leafWalk(node, board) {
         }
         // make equal max scores random???? maybe???/
         const chosenNode = node.children[indexOfMax];
-        if (chosenNode.isDead) {
-            console.log("bad news compodre")
-        }
         //POTENTIAL FOR OPTIMIZATION:
         //server query to true unless 1 move away from reaching leaf
         evaluateMoveOnBoardTree(chosenNode.player, chosenNode.move, board);
@@ -64,18 +61,23 @@ function leafWalk(node, board) {
 
 function selectAndExpand(rootNode, rootBoard) {
     const leaf = leafWalk(rootNode, rootBoard);
+    if (leaf.isDead) {
+        return leaf;
+    }
     const nextPlayer = leaf.player === 'O' ? 'X' : 'O';
     const possibleMoves = getAvailableMoves(rootBoard);
     //const chosenMoves = possibleMoves.slice(0, CHILDCOUNT)
     // if draw happens
     if (possibleMoves.length === 0 || rootBoard.wonBy !== '') {
-        leaf.isDead = true;
+        //leaf.isDead = true;
         return leaf//.parent.children[Math.floor(leaf.parent.children.length * Math.random())];
     }
     for (const possibleMove of possibleMoves) {
         leaf.children.push(new MonteCarloTree(nextPlayer, leaf, possibleMove, leaf.depth + 1))
     }
-    return leaf.children[Math.floor(possibleMoves.length * Math.random())];
+    const chosenMoveIndex = Math.floor(possibleMoves.length * Math.random());
+    evaluateMoveOnBoardTree(nextPlayer, possibleMoves[chosenMoveIndex], rootBoard);
+    return leaf.children[chosenMoveIndex];
 }
 
 const _LASTSIMULATE = [];
@@ -97,34 +99,29 @@ function simulate(currentPlayer, board) {
     }
 }
 
-function backpropagate(leafNode, winIncrement, simulatedWinner, nodeDied) {
+function backpropagate(leafNode, winIncrement, simulatedWinner) {
     leafNode.winCount += winIncrement;
     leafNode.simulationCount += 1;
-    if (nodeDied) {
-        console.log(leafNode.move)
-        if (!leafNode.isDead && leafNode.children.length !== 0) {
-            leafNode.isDead = leafNode.children.reduce((isSiblingDead, child) => {
-                return isSiblingDead && child.isDead;
-            }, true)
-        } 
-    }
     if (leafNode.parent === null) {
         return
     }
     else {
-        backpropagate(leafNode.parent, winIncrement === null ? null : winIncrement === 0.5 ? 0.5 : leafNode.player === simulatedWinner ? 0 : 1, simulatedWinner, nodeDied)
+        backpropagate(leafNode.parent, winIncrement === null ? null : winIncrement === 0.5 ? 0.5 : leafNode.player === simulatedWinner ? 0 : 1, simulatedWinner)
     }
 }
 
 function executeRound(rootNode, board) {
     const rootBoard = _.cloneDeep(board);
     const leaf = selectAndExpand(rootNode, rootBoard);
-    let simulatedWinner = leaf.isDead ? null : simulate(leaf.player, rootBoard);
-    if (simulatedWinner === null) {
-        simulatedWinner = rootBoard.wonBy === "" ? '-' : rootBoard.wonBy;
-    } 
+    if (!leaf.isDead && (rootBoard.wonBy !== '' || getAvailableMoves(rootBoard).length === 0)) {
+        if (leaf.simulationCount !== 0) {
+            console.log("sssss")
+        }
+        leaf.isDead = true;
+    }
+    let simulatedWinner = leaf.isDead ? rootBoard.wonBy === "" ? '-' : rootBoard.wonBy : simulate(leaf.player, rootBoard);
     //const simulatedWinner = leaf.isDead ? rootBoard.wonBy === '' ? '-' : rootBoard.wonBy : simulate(leaf.player, rootBoard);
-    backpropagate(leaf, simulatedWinner === '-' ? 0.5 : leaf.player === simulatedWinner ? 1 : 0, simulatedWinner, leaf.isDead)
+    backpropagate(leaf, simulatedWinner === '-' ? 0.5 : leaf.player === simulatedWinner ? 1 : 0, simulatedWinner)
     _LASTSIMULATE.length = 0
 }
 
@@ -133,14 +130,14 @@ function simulateGames(board, currentPlayer) {
     const startTime = Math.floor(Date.now() / 1000)
     let roundNum = 0;
     while (true) {
-        if (false && Math.floor(Date.now() / 1000) - startTime > THINKINGDURATION) {
+        if (Math.floor(Date.now() / 1000) - startTime > THINKINGDURATION) {
             break;
         }
         //every path is exhausted
         if (rootNode.isDead) {
             break;
         }
-        if (DEBUGMODE && roundNum > 20000) {
+        if (DEBUGMODE && roundNum % 1000 === 0) {
             console.log("round: " + roundNum);
         }
         roundNum++;

@@ -91,11 +91,14 @@ export class Game {
         const board = new BoardTree(null, this.gameDimension, 0, 0)
         const verifiedMoves = this.moves.slice(0, this.moves.length - 1);
         evaluateMovesOnBoardTree([], verifiedMoves, board, true)
-        evaluateMoveOnBoardTree(this.moves.length % 2 === 0 ? 'O' : 'X', this.moves[this.moves.length - 1], board)
+        if (!(this.moves.length === 0)) {
+            evaluateMoveOnBoardTree(this.moves.length % 2 === 0 ? 'O' : 'X', this.moves[this.moves.length - 1], board)
+        }
         return board;
     }
     checkMoveValidity(move) {
-        console.log(this.moves.length)
+        console.log(this.moves)
+        console.log(this.move)
         const targetBoard = getTreeNodeForCoords(this.getBoardFromStoredMoves(), move);
         // isactive only applies to boards of depth 1 or higher so wonby check is necessary
         if (targetBoard.parent.isActive && targetBoard.wonBy === '') {
