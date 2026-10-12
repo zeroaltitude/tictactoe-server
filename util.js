@@ -7,7 +7,6 @@ export class BoardTree {
         this.children=0
         this.wonBy=''
         this.isActive = true
-        this.numOfMovesPlayed = 0;
         if (depth==0) {
           return 0
         }
@@ -97,8 +96,7 @@ export function calculateShift(previousMove) {
   return pre.concat(suf);
 }
 
-export const evaluateMoveOnBoardTree = (currentMove, boardTree, serverQuery = false) => {
-  const playerCurrent = (boardTree.numOfMovesPlayed % 2 === 0) ? 'X' : 'O';
+export const evaluateMoveOnBoardTree = (playerCurrent, currentMove, boardTree, serverQuery = false) => {
   const treeNode = getTreeNodeForCoords(boardTree, currentMove.slice(0, currentMove.length - 2));
   let currentBoard = treeNode;
   let winDepth = 0;
@@ -116,16 +114,16 @@ export const evaluateMoveOnBoardTree = (currentMove, boardTree, serverQuery = fa
     currentBoard.children[coords[0]][coords[1]].wonBy = playerCurrent;
     winDepth++;
   }
-  boardTree.numOfMovesPlayed = boardTree.numOfMovesPlayed + 1;
   getTreeNodeForCoords(boardTree, currentMove).wonBy = playerCurrent;
   if (!serverQuery) {
     boardTree.setActiveStatus(calculateShift([treeNode, currentMove[currentMove.length - 2], currentMove[currentMove.length - 1], winDepth]));
   }
 }
 
-export const evaluateMovesOnBoardTree = (moveList, boardTree, serverQuery = false) => {
-  for (let moveIndex = boardTree.numOfMovesPlayed; moveIndex < moveList.length; moveIndex++) {
-    evaluateMoveOnBoardTree(moveList[moveIndex], boardTree, serverQuery = false)
+export const evaluateMovesOnBoardTree = (localMoveList, moveList, boardTree, serverQuery = false) => {
+  for (let moveIndex = localMoveList.length; moveIndex < moveList.length; moveIndex++) {
+    const playerCurrent = (moveIndex % 2 === 0) ? 'X' : 'O';
+    evaluateMoveOnBoardTree(playerCurrent, moveList[moveIndex], boardTree, serverQuery = false)
   }
   return boardTree;
 }

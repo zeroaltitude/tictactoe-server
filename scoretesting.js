@@ -7,7 +7,6 @@ const D2BOARD = {
     column : 0,
     wonBy : '',
     isActive : true,
-    numOfMovesPlayed : 0,
     children :[
         [
             {
@@ -16,7 +15,6 @@ const D2BOARD = {
             column : 0,
             wonBy : '',
             isActive : true,
-            numOfMovesPlayed : 0,
             children :[
                 [
                     {
@@ -25,7 +23,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : 'X',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -34,7 +31,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -43,7 +39,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ],
@@ -54,7 +49,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -63,7 +57,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : 'X',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -72,7 +65,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ],
@@ -83,7 +75,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : 'X',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -92,7 +83,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : 'X',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -101,7 +91,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ]
@@ -113,7 +102,6 @@ const D2BOARD = {
             column : 1,
             wonBy : '',
             isActive : true,
-            numOfMovesPlayed : 0,
             children :[
                 [
                     {
@@ -122,7 +110,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : 'O',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -131,7 +118,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -140,7 +126,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ],
@@ -151,7 +136,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -160,7 +144,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : 'O',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -169,7 +152,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ],
@@ -180,7 +162,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : 'O',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -189,7 +170,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -198,7 +178,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ]
@@ -210,7 +189,6 @@ const D2BOARD = {
             column : 2,
             wonBy : 'O',
             isActive : true,
-            numOfMovesPlayed : 0,
             children :[
                 [
                     {
@@ -219,7 +197,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : 'O',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -228,7 +205,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : 'O',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -237,7 +213,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : 'O',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ],
@@ -248,7 +223,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -257,7 +231,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -266,7 +239,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ],
@@ -277,7 +249,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : 'O',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -286,7 +257,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -295,7 +265,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ]
@@ -309,7 +278,6 @@ const D2BOARD = {
             column : 0,
             wonBy : '',
             isActive : true,
-            numOfMovesPlayed : 0,
             children :[
                 [
                     {
@@ -318,7 +286,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -327,7 +294,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -336,7 +302,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ],
@@ -347,7 +312,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -356,7 +320,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -365,7 +328,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ],
@@ -376,7 +338,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -385,7 +346,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -394,7 +354,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ]
@@ -406,7 +365,6 @@ const D2BOARD = {
             column : 1,
             wonBy : '',
             isActive : true,
-            numOfMovesPlayed : 0,
             children :[
                 [
                     {
@@ -415,7 +373,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -424,7 +381,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -433,7 +389,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ],
@@ -444,7 +399,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -453,7 +407,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -462,7 +415,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ],
@@ -473,7 +425,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -482,7 +433,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -491,7 +441,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ]
@@ -503,7 +452,6 @@ const D2BOARD = {
             column : 2,
             wonBy : '',
             isActive : true,
-            numOfMovesPlayed : 0,
             children :[
                 [
                     {
@@ -512,7 +460,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -521,7 +468,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -530,7 +476,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ],
@@ -541,7 +486,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -550,7 +494,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -559,7 +502,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ],
@@ -570,7 +512,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -579,7 +520,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -588,7 +528,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ]
@@ -602,7 +541,6 @@ const D2BOARD = {
             column : 0,
             wonBy : '',
             isActive : true,
-            numOfMovesPlayed : 0,
             children :[
                 [
                     {
@@ -611,7 +549,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -620,7 +557,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -629,7 +565,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ],
@@ -640,7 +575,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -649,7 +583,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -658,7 +591,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ],
@@ -669,7 +601,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -678,7 +609,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -687,7 +617,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ]
@@ -699,7 +628,6 @@ const D2BOARD = {
             column : 1,
             wonBy : '',
             isActive : true,
-            numOfMovesPlayed : 0,
             children :[
                 [
                     {
@@ -708,7 +636,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -717,7 +644,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -726,7 +652,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ],
@@ -737,7 +662,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -746,7 +670,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -755,7 +678,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ],
@@ -766,7 +688,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -775,7 +696,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -784,7 +704,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ]
@@ -796,7 +715,6 @@ const D2BOARD = {
             column : 2,
             wonBy : 'O',
             isActive : true,
-            numOfMovesPlayed : 0,
             children :[
                 [
                     {
@@ -805,7 +723,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : 'O',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -814,7 +731,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : 'O',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -823,7 +739,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : 'O',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ],
@@ -834,7 +749,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -843,7 +757,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -852,7 +765,6 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ],
@@ -863,7 +775,6 @@ const D2BOARD = {
                         column : 0,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -872,7 +783,6 @@ const D2BOARD = {
                         column : 1,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     },
                     {
@@ -881,11 +791,97 @@ const D2BOARD = {
                         column : 2,
                         wonBy : '',
                         isActive : true,
-                        numOfMovesPlayed : 0,
                         children : 0
                     }
                 ]
             ]
+            }
+        ]
+    ]
+}
+const D1BOARD = {
+    depth: 1,
+    row: 0,
+    column: 0,
+    wonBy: '',
+    isActive: true,
+    children: [
+        [
+            {
+                depth : 0,
+                row : 0, 
+                column : 0,
+                wonBy : 'X',
+                isActive : true,
+                children : 0
+            },
+            {
+                depth : 0,
+                row : 0, 
+                column : 1,
+                wonBy : '',
+                isActive : true,
+                children : 0
+            },
+            {
+                depth : 0,
+                row : 0, 
+                column : 2,
+                wonBy : '',
+                isActive : true,
+                children : 0
+            }
+        ],
+        [
+            {
+                depth : 0,
+                row : 1, 
+                column : 0,
+                wonBy : '',
+                isActive : true,
+                children : 0
+            },
+            {
+                depth : 0,
+                row : 1, 
+                column : 1,
+                wonBy : 'O',
+                isActive : true,
+                children : 0
+            },
+            {
+                depth : 0,
+                row : 1, 
+                column : 2,
+                wonBy : '',
+                isActive : true,
+                children : 0
+            }
+        ],
+        [
+            {
+                depth : 0,
+                row : 2, 
+                column : 0,
+                wonBy : '',
+                isActive : true,
+                children : 0
+            },
+            {
+                depth : 0,
+                row : 2, 
+                column : 1,
+                wonBy : '',
+                isActive : true,
+                children : 0
+            },
+            {
+                depth : 0,
+                row : 2, 
+                column : 2,
+                wonBy : 'X',
+                isActive : true,
+                children : 0
             }
         ]
     ]
@@ -923,12 +919,12 @@ function objectToBoard(boardObj, parentBoard = null) {
 }
 
 function main() {
-    console.log(D2BOARD)
-    console.log(objectToBoard(D2BOARD))
+    console.log(D1BOARD)
+    console.log(objectToBoard(D1BOARD))
     //console.log(scorePossibleWins(D2BOARD))
     const recommendedMoveList = [];
     for (let i = 0; i < 10; i++) {
-        const recommendedMove = getNextMove(objectToBoard(D2BOARD), 'O')
+        const recommendedMove = getNextMove(objectToBoard(D1BOARD), 'O')
         recommendedMoveList.push(recommendedMove)
         console.log(recommendedMove)
     }

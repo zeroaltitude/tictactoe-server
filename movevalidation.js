@@ -86,9 +86,12 @@ export class Game {
         return this.#error;
     }
     getBoardFromStoredMoves() {
+        console.log("BAGHG GG")
+        console.log(this.moves)
         const board = new BoardTree(null, this.gameDimension, 0, 0)
-        evaluateMovesOnBoardTree(this.moves.slice(0, this.moves.length-1), board, true)
-        evaluateMoveOnBoardTree(this.moves[this.moves.length - 1], board)
+        const verifiedMoves = this.moves.slice(0, this.moves.length - 1);
+        evaluateMovesOnBoardTree([], verifiedMoves, board, true)
+        evaluateMoveOnBoardTree(this.moves.length % 2 === 0 ? 'O' : 'X', this.moves[this.moves.length - 1], board)
         return board;
     }
     checkMoveValidity(move) {
