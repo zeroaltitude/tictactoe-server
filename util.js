@@ -76,10 +76,6 @@ export function checkWin(toCheck) {
 }
 
 export const getTreeNodeForCoords = (boardTreeRoot, coordinates) => {
-  //console.log("this is the board tree passed in")
-  //console.log(boardTreeRoot)
-  //console.log("COORDS::")
-  //console.log(coordinates)
     if (coordinates.length>0) {
         return getTreeNodeForCoords(boardTreeRoot.children[coordinates[0]][coordinates[1]], coordinates.slice(2));
     } else {
@@ -126,4 +122,20 @@ export const evaluateMovesOnBoardTree = (localMoveList, moveList, boardTree, ser
     evaluateMoveOnBoardTree(playerCurrent, moveList[moveIndex], boardTree, serverQuery = false)
   }
   return boardTree;
+}
+
+export function getAvailableMoves(board, moves = []) {
+    if (board.depth === 0 && board.wonBy === '') {
+        moves.push(board.parent.getFullRoute([board.row, board.column]))
+    }
+    else {
+        for (let row in board.children) {
+            for (let column in board.children[row]) {
+                if (board.children[row][column].isActive) {
+                    getAvailableMoves(board.children[row][column], moves)
+                }
+            }
+        }
+    }
+    return moves;
 }

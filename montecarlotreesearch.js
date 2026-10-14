@@ -1,13 +1,10 @@
-import { checkWin } from "./util.js";
-import { PLAYERS } from "./constants.js";
-import { getAvailableMoves } from "./movevalidation.js";
 import _ from "lodash";
-import { evaluateMoveOnBoardTree } from "./util.js";
+import { evaluateMoveOnBoardTree, getAvailableMoves } from "./util.js";
 import { DEBUGMODE } from "./constants.js";
 
 
 const CHILDCOUNT = 3;
-const THINKINGDURATION = 5; // in seconds
+const THINKINGDURATION = .05; // in seconds
 
 class MonteCarloTree {
     constructor(player, parent = null, move = null, depth = 0) {
@@ -27,20 +24,6 @@ function leafWalk(node, board) {
         return node
     }
     else {
-        //probably works :
-        //update: doesnt (node indexes dont align with scores if some scores are not taken)
-        //this might be a good optimization though so fix later maybe
-        //const nodeScores = node.children.reduce((scores, child) => {
-        //    if (child.isDead) {
-        //        console.log("THIS IS WHERE IT GETS GOOD")
-        //    }
-        //    if (!child.isDead) {
-        //        scores.push(child.simulationCount === 0 ? Infinity : ((child.winCount / child.simulationCount) + (Math.sqrt(Math.log(node.simulationCount) / child.simulationCount))));
-        //    }
-        //    return scores
-        //}, []);
-
-        // semi inefficient implementation where dead scores are just -1 so they are not chosen
         const nodeScores = node.children.map((child) => {return (child.simulationCount === 0 ? Infinity : ((child.winCount / child.simulationCount) + (Math.sqrt(Math.log(node.simulationCount) / child.simulationCount))))})
         let max = nodeScores[0];
         let indexOfMax = 0;
@@ -66,11 +49,9 @@ function selectAndExpand(rootNode, rootBoard) {
     }
     const nextPlayer = leaf.player === 'O' ? 'X' : 'O';
     const possibleMoves = getAvailableMoves(rootBoard);
-    //const chosenMoves = possibleMoves.slice(0, CHILDCOUNT)
-    // if draw happens
+    // if node reached where game ends
     if (possibleMoves.length === 0 || rootBoard.wonBy !== '') {
-        //leaf.isDead = true;
-        return leaf//.parent.children[Math.floor(leaf.parent.children.length * Math.random())];
+        return leaf;
     }
     for (const possibleMove of possibleMoves) {
         leaf.children.push(new MonteCarloTree(nextPlayer, leaf, possibleMove, leaf.depth + 1))
@@ -114,13 +95,9 @@ function executeRound(rootNode, board) {
     const rootBoard = _.cloneDeep(board);
     const leaf = selectAndExpand(rootNode, rootBoard);
     if (!leaf.isDead && (rootBoard.wonBy !== '' || getAvailableMoves(rootBoard).length === 0)) {
-        if (leaf.simulationCount !== 0) {
-            console.log("sssss")
-        }
         leaf.isDead = true;
     }
     let simulatedWinner = leaf.isDead ? rootBoard.wonBy === "" ? '-' : rootBoard.wonBy : simulate(leaf.player, rootBoard);
-    //const simulatedWinner = leaf.isDead ? rootBoard.wonBy === '' ? '-' : rootBoard.wonBy : simulate(leaf.player, rootBoard);
     backpropagate(leaf, simulatedWinner === '-' ? 0.5 : leaf.player === simulatedWinner ? 1 : 0, simulatedWinner)
     _LASTSIMULATE.length = 0
 }
@@ -133,27 +110,23 @@ function simulateGames(board, currentPlayer) {
         if (Math.floor(Date.now() / 1000) - startTime > THINKINGDURATION) {
             break;
         }
-        //every path is exhausted
-        if (rootNode.isDead) {
-            break;
-        }
         if (DEBUGMODE && roundNum % 1000 === 0) {
             console.log("round: " + roundNum);
         }
         roundNum++;
         executeRound(rootNode, board);
     }
-    if (DEBUGMODE) {
-        console.log(rootNode)
-    }
     const scores = {};
     rootNode.children.map((childNode) => { scores[childNode.move] = childNode.winCount / childNode.simulationCount });
-    console.log(scores)
+    if (DEBUGMODE) {
+        console.log(rootNode)
+        console.log(scores)
+    }
     return scores;
 }
 
 export function getNextMove(board, currentPlayer) {
     const moveScores = simulateGames(board, currentPlayer)
-    return Object.keys(moveScores).reduce((a, b) => moveScores[a] > moveScores[b] ? a : b);
+    return Object.keys(moveScores).reduce((a, b) => moveScores[a] > moveScores[b] ? a : b, []);
 }
 

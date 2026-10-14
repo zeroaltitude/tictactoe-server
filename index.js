@@ -2,10 +2,9 @@ import express from 'express';
 import cors from 'cors';
 const app = express();
 const port = 3030;
-import fs from 'fs';
 const GAMEIDLEN = 6;
 
-import { Game } from './movevalidation.js';
+import { Game, isDuplicateId } from './movevalidation.js';
 import { getNextMove } from './montecarlotreesearch.js';
 
 // Enable CORS with the defined options
@@ -27,7 +26,10 @@ app.get("/games", (req, res) => {
 });
 
 app.post("/games", (req, res) => {
-    const newGameId = String(Math.floor(Math.random() * (10 ** GAMEIDLEN))).padStart(GAMEIDLEN, '0');
+    let newGameId = String(Math.floor(Math.random() * (10 ** GAMEIDLEN))).padStart(GAMEIDLEN, '0');
+    while (isDuplicateId(newGameId)) {
+        newGameId = String(Math.floor(Math.random() * (10 ** GAMEIDLEN))).padStart(GAMEIDLEN, '0');
+    }
     new Game(newGameId, req.body.gameDimension).save();
     res.json({
         "gameID": newGameId
@@ -106,8 +108,14 @@ app.put("/games/:game_id", (req, res) => {
                 if (!(((game.moves[game.moves.length-1])??['a','b']).join()==body.move.join())) {
                     game.moves.push(body.move);
                 }
-                if (game.isComputerGame) {
-                    game.moves.push((getNextMove(game.getBoardFromStoredMoves(), 'O')).split(',').map(Number));
+                if (game.isComputerGame && !game.gameHasEnded) {
+                    const selectedMove = getNextMove(game.getBoardFromStoredMoves(), 'O')
+                    if (selectedMove.length === 0) {
+                        game.gameHasEnded = true;
+                    }
+                    else {
+                        game.moves.push(selectedMove.split(',').map(Number));
+                    }
                 }
                 game.save();
                 break;
@@ -125,44 +133,25 @@ app.put("/games/:game_id", (req, res) => {
                 break;
             // by far the worst code ive ever written tbh: 
             case "undoMove":
-                console.log(body.playerWhoRequestedUndo, game.playerX, game.playerO)
-                if (!(body.playerWhoRequestedUndo === game.playerX || body.playerWhoRequestedUndo === game.playerO || body.playerWhoRequestedUndo === '')) {
-                    res.json({
-                        "response": `player who requested not in game`
-                    });
-                    break;
-                }
-                if (game.playerWhoRequestedUndo === '' && (((body.playerWhoRequestedUndo === game.playerO) && game.moves.length % 2 === 1) || ((body.playerWhoRequestedUndo === game.playerX) && game.moves.length % 2 === 0))) {
-                    res.json({
-                        "response": `cannot undo opponents move`
-                    });
-                    break;
-                }
-                if ((game.playerWhoRequestedUndo === '' || body.playerWhoRequestedUndo === game.playerWhoRequestedUndo) && body.confirmUndo === null) {
+                if (game.playerWhoRequestedUndo === '') {
                     game.playerWhoRequestedUndo = body.playerWhoRequestedUndo;
-                    res.json({
-                        "response": `undo requested`
-                    });
-                    break;
                 }
-                if (body.playerWhoRequestedUndo !== game.playerWhoRequestedUndo && body.confirmUndo === null) {
-                    //toggle off without confirming or unconfirming
-                    game.playerWhoRequestedUndo = '';
-                    res.json({
-                        "response": 'undo ask toggled off'
-                    })
-                    break;
+                else {
+                    if (body.playerWhoRequestedUndo === '') {
+                        game.playerWhoRequestedUndo = '';
+                        console.log("clear undo")
+                    }
+                    else if (game.playerWhoRequestedUndo !== body.playerWhoRequestedUndo) {
+                        game.moves.pop();
+                        game.playerWhoRequestedUndo = '';
+                    }
+                    else {
+                        res.json({
+                            "response": "undo cancelled"
+                        })
+                    }
                 }
-                if (body.playerWhoRequestedUndo !== game.playerWhoRequestedUndo && body.confirmUndo) {
-                    game.moves.pop();
-                    res.json({
-                        "response": `move undone`
-                    });
-                    break;
-                }
-                res.json({
-                    "response": `undo denied`
-                });
+                game.save()
                 break;
             //THIS IS FOR DEBUGGING ONLY ~~ REMOVE LATER
             case "setMoves":

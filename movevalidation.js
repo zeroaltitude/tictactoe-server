@@ -11,7 +11,6 @@ function flattenBoardTree(tree, layer, coordinates = '', flatBoard = {}) {
   if (layer === 0) {
     let obj = {}
     obj[coordinates] = tree
-    console.log(obj)
     return obj
   }
   let obj = {}
@@ -23,25 +22,13 @@ function flattenBoardTree(tree, layer, coordinates = '', flatBoard = {}) {
   return obj 
 }
 
-export function getAvailableMoves(board, moves = []) {
-    if (board.depth === 0 && board.wonBy === '') {
-        moves.push(board.parent.getFullRoute([board.row, board.column]))
-    }
-    else {
-        for (let row in board.children) {
-            for (let column in board.children[row]) {
-                if (board.children[row][column].isActive) {
-                    getAvailableMoves(board.children[row][column], moves)
-                }
-            }
-        }
-    }
-    return moves;
+export function isDuplicateId(id) {
+    const isUnique = fs.readdirSync('./state/games/').splice(1).every((file) => { return file.split('.')[0] !== id });
+    return !isUnique;
 }
 
 export class Game {
     #error;
-    #maxDepth;
     constructor(gameID, gameDimension=1) {
         this.moves = [];
         this.gameID = gameID;
@@ -51,8 +38,8 @@ export class Game {
         this.gameDimension = gameDimension;
         this.playerWhoRequestedUndo = '';
         this.#error = false;
-        this.#maxDepth = 6;
         this.isComputerGame = false;
+        this.gameHasEnded = false;
         //this.board = new BoardTree(null,gameDimension,0,0);
     }
     load() {
@@ -86,8 +73,6 @@ export class Game {
         return this.#error;
     }
     getBoardFromStoredMoves() {
-        console.log("BAGHG GG")
-        console.log(this.moves)
         const board = new BoardTree(null, this.gameDimension, 0, 0)
         const verifiedMoves = this.moves.slice(0, this.moves.length - 1);
         evaluateMovesOnBoardTree([], verifiedMoves, board, true)
@@ -97,8 +82,6 @@ export class Game {
         return board;
     }
     checkMoveValidity(move) {
-        console.log(this.moves)
-        console.log(this.move)
         const targetBoard = getTreeNodeForCoords(this.getBoardFromStoredMoves(), move);
         // isactive only applies to boards of depth 1 or higher so wonby check is necessary
         if (targetBoard.parent.isActive && targetBoard.wonBy === '') {
