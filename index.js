@@ -3,8 +3,9 @@ import cors from 'cors';
 const app = express();
 const port = 3030;
 const GAMEIDLEN = 6;
+const BOTNAME = "tictactimmy";
 
-import { Game, isDuplicateId } from './movevalidation.js';
+import { Game, isDuplicateId } from './datamanagement.js';
 import { getNextMove } from './montecarlotreesearch.js';
 
 // Enable CORS with the defined options
@@ -43,7 +44,6 @@ app.get("/games/:game_id", (req, res) => {
 });
 
 app.put("/games/:game_id", (req, res) => {
-    let playerIdentifier = '';
     const game = new Game(req.params.game_id);
     game.load();
     if (game.isError()) {
@@ -57,31 +57,34 @@ app.put("/games/:game_id", (req, res) => {
                 game.isComputerGame = false;
                 const playerName = body.playerName;
                 if (game.playerX === '' && game.playerO === '') {
-                    if (Math.random() >= .5) {
+                    if (body.playerIdentifier === 'X') {
                         game.playerX = playerName;
-                        playerIdentifier = 'X';
+                    }
+                    else if (body.playerIdentifier === 'O') {
+                        game.playerO = playerName;
                     }
                     else {
-                        game.playerO = playerName;
-                        playerIdentifier = 'O';
+                        if (Math.random() >= .5) {
+                            game.playerX = playerName;
+                        }
+                        else {
+                            game.playerO = playerName;
+                        }
                     }
                 }
                 else if (game.playerX === '') {
                     // set player name (duplicate name support)
                     game.playerX = game.playerO === playerName ? `${playerName}(1)` : playerName;
                     game.gameStarted = true;
-                    playerIdentifier = 'X';
                 }
                 else if (game.playerO === '') {
                     game.playerO = game.playerX === playerName ? `${playerName}(1)` : playerName;
                     game.gameStarted = true;
-                    playerIdentifier = 'O';
                 }
                 else if (playerName === game.playerX || playerName === game.playerO) {
                     res.json({
                         "response": "already started",
-                        "playerIdentifier": ((playerName === game.playerX) ? 'X' : 'O'),
-                        "gameDimension": game.gameDimension
+                        "playerIdentifier": game.playerX === playerName ? 'X' : 'O'
                     });
                 }
                 else {
@@ -90,9 +93,10 @@ app.put("/games/:game_id", (req, res) => {
                     });
                     return;
                 }
+                const playerIdentifier = game.playerX === playerName ? 'X' : 'O';
                 res.json({
-                    "playerIdentifier": playerIdentifier,
-                    "gameDimension": game.gameDimension
+                    "response": `game joined as ${playerIdentifier}`,
+                    "playerIdentifier": `${playerIdentifier}`
                 });
                 console.log("writing to file")
                 console.log(game)
@@ -109,7 +113,7 @@ app.put("/games/:game_id", (req, res) => {
                     game.moves.push(body.move);
                 }
                 if (game.isComputerGame && !game.gameHasEnded) {
-                    const selectedMove = getNextMove(game.getBoardFromStoredMoves(), 'O')
+                    const selectedMove = getNextMove(game.getBoardFromStoredMoves(), game.playerX === BOTNAME ? 'X' : 'O', game.botDifficulty)
                     if (selectedMove.length === 0) {
                         game.gameHasEnded = true;
                     }
@@ -121,17 +125,38 @@ app.put("/games/:game_id", (req, res) => {
                 break;
             case "playComputer":
                 const humanName = body.playerName;
-                game.playerX = "tictactimmy" === humanName ? `${humanName}(1)` : humanName;
-                game.playerO = "tictactimmy"
-                game.gameStarted = true
+                if (body.playerIdentifier === 'X') {
+                    game.playerO = BOTNAME;
+                    game.playerX = humanName === BOTNAME ? `${BOTNAME}(1)` : humanName;
+                }
+                else if (body.playerIdentifier === 'O') {
+                    game.playerX = BOTNAME;
+                    game.playerO = humanName === BOTNAME ? `${BOTNAME}(1)` : humanName;
+                }
+                else {
+                    if (Math.random() >= .5) {
+                        game.playerO = BOTNAME;
+                        game.playerX = humanName === BOTNAME ? `${BOTNAME}(1)` : humanName;
+                    }
+                    else {
+                        game.playerX = BOTNAME;
+                        game.playerO = humanName === BOTNAME ? `${BOTNAME}(1)` : humanName;
+                    }
+                }
+                game.gameStarted = true;
                 game.isComputerGame = true;
+                game.botDifficulty = body.botDifficulty;
+                const botMove = game.playerX === humanName ? [] : getNextMove(game.getBoardFromStoredMoves(), game.playerX === BOTNAME ? 'X' : 'O', body.botDifficulty).split(',').map(Number);
+                if (botMove.length !== 0) {
+                    game.moves = [botMove,]
+                }
                 res.json({
-                    "playerIdentifier": 'X',
-                    "gameDimension": game.gameDimension
+                    "gameDimension": game.gameDimension,
+                    "move": game.moves,
+                    "playerIdentifier": game.playerX === humanName ? 'X' : 'O'
                 });
                 game.save();
                 break;
-            // by far the worst code ive ever written tbh: 
             case "undoMove":
                 if (game.playerWhoRequestedUndo === '') {
                     game.playerWhoRequestedUndo = body.playerWhoRequestedUndo;

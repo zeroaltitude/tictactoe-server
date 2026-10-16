@@ -3,8 +3,7 @@ import { evaluateMoveOnBoardTree, getAvailableMoves } from "./util.js";
 import { DEBUGMODE } from "./constants.js";
 
 
-const CHILDCOUNT = 3;
-const THINKINGDURATION = .05; // in seconds
+const THINKINGDURATION = .25; // in seconds
 
 class MonteCarloTree {
     constructor(player, parent = null, move = null, depth = 0) {
@@ -87,7 +86,7 @@ function backpropagate(leafNode, winIncrement, simulatedWinner) {
         return
     }
     else {
-        backpropagate(leafNode.parent, winIncrement === null ? null : winIncrement === 0.5 ? 0.5 : leafNode.player === simulatedWinner ? 0 : 1, simulatedWinner)
+        backpropagate(leafNode.parent, winIncrement === 0.5 ? 0.5 : leafNode.player === simulatedWinner ? 0 : 1, simulatedWinner)
     }
 }
 
@@ -107,7 +106,7 @@ function simulateGames(board, currentPlayer) {
     const startTime = Math.floor(Date.now() / 1000)
     let roundNum = 0;
     while (true) {
-        if (Math.floor(Date.now() / 1000) - startTime > THINKINGDURATION) {
+        if (Math.floor(Date.now() / 1000) - startTime > THINKINGDURATION || roundNum > 5000 * Math.pow(9, board.depth-1)) { 
             break;
         }
         if (DEBUGMODE && roundNum % 1000 === 0) {
@@ -118,15 +117,29 @@ function simulateGames(board, currentPlayer) {
     }
     const scores = {};
     rootNode.children.map((childNode) => { scores[childNode.move] = childNode.winCount / childNode.simulationCount });
-    if (DEBUGMODE) {
-        console.log(rootNode)
-        console.log(scores)
-    }
     return scores;
 }
 
-export function getNextMove(board, currentPlayer) {
+function applyDifficultyToMoveset(scores, difficulty) {
+    const scoreIndex = scores.length - 1;
+    const difficultyWeights = {
+        "easy": [Math.floor(scoreIndex * .1), scoreIndex],
+        "medium": [Math.floor(scoreIndex * .05), Math.floor(scores.length * .5)],
+        "hard": [0, Math.min(3, scoreIndex)],
+        "insane": [0, 1]
+    };  
+    const chosenPossibleMoves = scores.slice(difficultyWeights[difficulty][0], difficultyWeights[difficulty][1]);
+    return chosenPossibleMoves[Math.floor(chosenPossibleMoves.length * Math.random())][0]
+}
+
+export function getNextMove(board, currentPlayer, botDifficulty) {
     const moveScores = simulateGames(board, currentPlayer)
-    return Object.keys(moveScores).reduce((a, b) => moveScores[a] > moveScores[b] ? a : b, []);
+    if (Object.keys(moveScores).length === 0) {
+        return [];
+    }
+    const sortedScores = Object.entries(moveScores).sort((a, b) => b[1] - a[1]) //scores sorted descendingly in array format
+    return applyDifficultyToMoveset(sortedScores, botDifficulty)
+
+    //return Object.keys(moveScores).reduce((a, b) => moveScores[a] > moveScores[b] ? a : b, []); //returns move corresponding to highest score
 }
 

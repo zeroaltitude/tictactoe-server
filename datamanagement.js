@@ -1,4 +1,4 @@
-import { getTreeNodeForCoords, calculateShift, checkWin, BoardTree, evaluateMovesOnBoardTree, evaluateMoveOnBoardTree } from './util.js';
+import { getTreeNodeForCoords, BoardTree, evaluateMovesOnBoardTree, evaluateMoveOnBoardTree } from './util.js';
 
 import fs from 'fs';
 
@@ -39,7 +39,8 @@ export class Game {
         this.playerWhoRequestedUndo = '';
         this.#error = false;
         this.isComputerGame = false;
-        this.gameHasEnded = false;
+        this.gameHasEnded = false; 
+        this.botDifficulty = null;
         //this.board = new BoardTree(null,gameDimension,0,0);
     }
     load() {

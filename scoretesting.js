@@ -919,12 +919,12 @@ function objectToBoard(boardObj, parentBoard = null) {
 }
 
 function main() {
-    console.log(D1BOARD)
-    console.log(objectToBoard(D1BOARD))
+    //console.log(D1BOARD)
+    //console.log(objectToBoard(D1BOARD))
     //console.log(scorePossibleWins(D2BOARD))
     const recommendedMoveList = [];
-    for (let i = 0; i < 10; i++) {
-        const recommendedMove = getNextMove(objectToBoard(D1BOARD), 'O')
+    for (let i = 0; i < 1; i++) {
+        const recommendedMove = getNextMove(objectToBoard(D1BOARD), 'O', "insane")
         recommendedMoveList.push(recommendedMove)
         console.log(recommendedMove)
     }
