@@ -3,7 +3,7 @@ import { evaluateMoveOnBoardTree, getAvailableMoves } from "./util.js";
 import { DEBUGMODE } from "./constants.js";
 
 
-const THINKINGDURATION = .25; // in seconds
+const THINKINGDURATION = 100; // in seconds
 
 class MonteCarloTree {
     constructor(player, parent = null, move = null, depth = 0) {
@@ -106,7 +106,7 @@ function simulateGames(board, currentPlayer) {
     const startTime = Math.floor(Date.now() / 1000)
     let roundNum = 0;
     while (true) {
-        if (Math.floor(Date.now() / 1000) - startTime > THINKINGDURATION || roundNum > 5000 * Math.pow(9, board.depth-1)) { 
+        if (Math.floor(Date.now() / 1000) - startTime > THINKINGDURATION || roundNum > 2000 * Math.pow(9, board.depth-1)) { 
             break;
         }
         if (DEBUGMODE && roundNum % 1000 === 0) {

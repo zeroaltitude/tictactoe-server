@@ -1,25 +1,60 @@
 import { getTreeNodeForCoords, BoardTree, evaluateMovesOnBoardTree, evaluateMoveOnBoardTree } from './util.js';
-
+import _ from "lodash"
 import fs from 'fs';
 
 import path from 'node:path';
 const ROOTGAMEDIR = path.join(import.meta.dirname, 'state', 'games');
 
-function flattenBoardTree(tree, layer, coordinates = '', flatBoard = {}) {
-  coordinates += tree.row.toString()
-  coordinates += tree.column.toString()
-  if (layer === 0) {
-    let obj = {}
-    obj[coordinates] = tree
-    return obj
+function boardToObject(board) {
+  const obj = {
+    depth: board.depth,
+    row: board.row,
+    column: board.column,
+    wonBy: board.wonBy,
+    isActive: board.isActive,
+    children: board.depth === 0 ? 0 : []
   }
-  let obj = {}
-  for (let row in tree.children) {
-    for (let column in tree.children[row]) {
-      obj = { ...obj, ...flattenBoardTree(tree.children[row][column], layer - 1, coordinates)}
+  if (board.children === 0) {
+    return obj;
+  }
+  else {
+    for (let row = 0; row < 3; row++) {
+      const rowChildren = [];
+      rowChildren.length = 0;
+      for (let column = 0; column < 3; column++) {
+        rowChildren.push(boardToObject(board.children[row][column]));
+      }
+      obj.children.push(rowChildren)
     }
+    return obj;
   }
-  return obj 
+}
+
+function objectToBoard(boardObj, fixActiveStatus = false, parentBoard = null) {
+    const boardTree = new BoardTree(null, boardObj.depth, 0, 0);
+    Object.assign(boardTree, boardObj)
+    boardTree.isActive = fixActiveStatus ? boardObj.wonBy === '' : boardObj.isActive
+    boardTree.children = [];
+    boardTree.parent = parentBoard;
+    for (let row = 0; row < 3; row++) {
+        boardTree.children[row] = [];
+        for (let column = 0; column < 3; column++) {
+            if (boardObj.depth > 1) {
+                boardTree.children[row][column] = objectToBoard(boardObj.children[row][column], fixActiveStatus, boardTree);
+            }
+            else {
+                const leafTree = new BoardTree(parentBoard, 0, row, column);
+                boardTree.children[row][column] = leafTree;
+                leafTree.parent = boardTree;
+                boardTree.children[row][column].wonBy = boardObj.children[row][column].wonBy;
+                leafTree.isActive = fixActiveStatus ? boardObj.children[row][column].wonBy === '' : boardObj.children[row][column].isActive;
+                if (!boardTree.isActive && fixActiveStatus) {
+                    leafTree.isActive = false;
+                }
+            }
+        }
+    }
+    return boardTree
 }
 
 export function isDuplicateId(id) {
@@ -29,7 +64,8 @@ export function isDuplicateId(id) {
 
 export class Game {
     #error;
-    constructor(gameID, gameDimension=1) {
+    constructor(gameID, gameDimension = 1, undoEnabled = false) {
+        this.#error = false;
         this.moves = [];
         this.gameID = gameID;
         this.playerX = '';
@@ -37,11 +73,12 @@ export class Game {
         this.gameStarted = false;
         this.gameDimension = gameDimension;
         this.playerWhoRequestedUndo = '';
-        this.#error = false;
         this.isComputerGame = false;
         this.gameHasEnded = false; 
+        this.undoEnabled = undoEnabled;
         this.botDifficulty = null;
-        //this.board = new BoardTree(null,gameDimension,0,0);
+        const tempBoard = new BoardTree(null, gameDimension, 0, 0);
+        this.boardObj = boardToObject(tempBoard);
     }
     load() {
         const pathName = path.join(ROOTGAMEDIR, `${this.gameID}.json`);
@@ -59,7 +96,7 @@ export class Game {
         Object.assign(this, game);
         return game;
     };
-    save() {
+    save() { 
         fs.writeFileSync(path.join(ROOTGAMEDIR, `${this.gameID}.json`),JSON.stringify(this), (err) => {
             if (err) {
                 this.#error = true;
@@ -73,9 +110,26 @@ export class Game {
     isError() {
         return this.#error;
     }
-    getBoardFromStoredMoves() {
+    updateMoves(move, setMovesTo = []) {
+        if (setMovesTo.length !== 0) {
+            //console.log(setMovesTo)
+            this.moves = setMovesTo;
+            const newBoard = this.getBoardUsingStoredMoves();
+            this.boardObj = boardToObject(newBoard);
+        }
+        else {
+            this.moves.push(move);
+            const board = objectToBoard(this.boardObj);
+            evaluateMoveOnBoardTree(this.moves.length % 2 === 0 ? 'O' : 'X', move, board);
+            this.boardObj = boardToObject(board);
+        }
+    }
+    getBoard() {
+        return objectToBoard(this.boardObj);
+    }
+    getBoardUsingStoredMoves() {
         const board = new BoardTree(null, this.gameDimension, 0, 0)
-        const verifiedMoves = this.moves.slice(0, this.moves.length - 1);
+        const verifiedMoves = this.moves.slice(0, this.moves.length - 1);  
         evaluateMovesOnBoardTree([], verifiedMoves, board, true)
         if (!(this.moves.length === 0)) {
             evaluateMoveOnBoardTree(this.moves.length % 2 === 0 ? 'O' : 'X', this.moves[this.moves.length - 1], board)
@@ -83,7 +137,7 @@ export class Game {
         return board;
     }
     checkMoveValidity(move) {
-        const targetBoard = getTreeNodeForCoords(this.getBoardFromStoredMoves(), move);
+        const targetBoard = getTreeNodeForCoords(this.getBoard(), move);
         // isactive only applies to boards of depth 1 or higher so wonby check is necessary
         if (targetBoard.parent.isActive && targetBoard.wonBy === '') {
             return true

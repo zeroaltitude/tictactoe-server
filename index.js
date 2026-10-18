@@ -31,7 +31,7 @@ app.post("/games", (req, res) => {
     while (isDuplicateId(newGameId)) {
         newGameId = String(Math.floor(Math.random() * (10 ** GAMEIDLEN))).padStart(GAMEIDLEN, '0');
     }
-    new Game(newGameId, req.body.gameDimension).save();
+    new Game(newGameId, req.body.gameDimension, req.body.undoEnabled).save();
     res.json({
         "gameID": newGameId
     });
@@ -84,7 +84,8 @@ app.put("/games/:game_id", (req, res) => {
                 else if (playerName === game.playerX || playerName === game.playerO) {
                     res.json({
                         "response": "already started",
-                        "playerIdentifier": game.playerX === playerName ? 'X' : 'O'
+                        "playerIdentifier": game.playerX === playerName ? 'X' : 'O',
+                        "undoEnabled": game.undoEnabled
                     });
                 }
                 else {
@@ -96,7 +97,8 @@ app.put("/games/:game_id", (req, res) => {
                 const playerIdentifier = game.playerX === playerName ? 'X' : 'O';
                 res.json({
                     "response": `game joined as ${playerIdentifier}`,
-                    "playerIdentifier": `${playerIdentifier}`
+                    "playerIdentifier": `${playerIdentifier}`,
+                    "undoEnabled": game.undoEnabled
                 });
                 console.log("writing to file")
                 console.log(game)
@@ -109,16 +111,16 @@ app.put("/games/:game_id", (req, res) => {
                     });
                     return;
                 }
-                if (!(((game.moves[game.moves.length-1])??['a','b']).join()==body.move.join())) {
-                    game.moves.push(body.move);
+                if (!(((game.moves[game.moves.length-1]) ?? ['a','b']).join() === body.move.join())) {
+                    game.updateMoves(body.move);
                 }
                 if (game.isComputerGame && !game.gameHasEnded) {
-                    const selectedMove = getNextMove(game.getBoardFromStoredMoves(), game.playerX === BOTNAME ? 'X' : 'O', game.botDifficulty)
+                    const selectedMove = getNextMove(game.getBoard(), game.playerX === BOTNAME ? 'X' : 'O', game.botDifficulty)
                     if (selectedMove.length === 0) {
                         game.gameHasEnded = true;
                     }
                     else {
-                        game.moves.push(selectedMove.split(',').map(Number));
+                        game.updateMoves(selectedMove.split(',').map(Number));
                     }
                 }
                 game.save();
@@ -146,9 +148,9 @@ app.put("/games/:game_id", (req, res) => {
                 game.gameStarted = true;
                 game.isComputerGame = true;
                 game.botDifficulty = body.botDifficulty;
-                const botMove = game.playerX === humanName ? [] : getNextMove(game.getBoardFromStoredMoves(), game.playerX === BOTNAME ? 'X' : 'O', body.botDifficulty).split(',').map(Number);
+                const botMove = game.playerX === humanName ? [] : getNextMove(game.getBoard(), game.playerX === BOTNAME ? 'X' : 'O', body.botDifficulty).split(',').map(Number);
                 if (botMove.length !== 0) {
-                    game.moves = [botMove,]
+                    game.updateMoves(botMove)
                 }
                 res.json({
                     "gameDimension": game.gameDimension,
@@ -158,18 +160,23 @@ app.put("/games/:game_id", (req, res) => {
                 game.save();
                 break;
             case "undoMove":
-                if (game.playerWhoRequestedUndo === '') {
+                //player requests undo
+                if (game.playerWhoRequestedUndo === '' && !game.isComputerGame) {
                     game.playerWhoRequestedUndo = body.playerWhoRequestedUndo;
                 }
+                // another player has already requested undo
                 else {
+                    //other player rejects undo
                     if (body.playerWhoRequestedUndo === '') {
                         game.playerWhoRequestedUndo = '';
                         console.log("clear undo")
                     }
-                    else if (game.playerWhoRequestedUndo !== body.playerWhoRequestedUndo) {
-                        game.moves.pop();
+                    //other player accepts undo
+                    else if ((game.playerWhoRequestedUndo !== body.playerWhoRequestedUndo) || game.isComputerGame) {
+                        game.updateMoves([], game.moves.slice(0,game.moves.length-(game.isComputerGame ? 2 : 1)));
                         game.playerWhoRequestedUndo = '';
                     }
+                    //should never happen
                     else {
                         res.json({
                             "response": "undo cancelled"
@@ -180,7 +187,7 @@ app.put("/games/:game_id", (req, res) => {
                 break;
             //THIS IS FOR DEBUGGING ONLY ~~ REMOVE LATER
             case "setMoves":
-                game.moves = body.moves;
+                game.updateMoves([], body.moves);
                 console.log("writing to file")    
                 console.log(game)    
                 game.save();
