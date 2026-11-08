@@ -4,17 +4,22 @@ import { DEBUGMODE } from "./constants.js";
 
 
 const THINKINGDURATION = 100; // in seconds
+const THINKINGROUNDNUMWEIGHT = 1;
 
 class MonteCarloTree {
     constructor(player, parent = null, move = null, depth = 0) {
         this.player = player;
         this.winCount = 0;
         this.simulationCount = 0;
-        this.depth = depth; // not actually necessary to code, purely for debugging (FOR NOW!)
+        this.depth = depth; // not actually necessary to code, purely for debugging
         this.move = move;
         this.children = [];
         this.parent = parent;
         this.isDead = false;
+
+        //DEBUGGING ONLY, NO UTIL
+        this.losses = 0;
+        this.draws = 0;
     }
 }
 
@@ -82,6 +87,17 @@ function simulate(currentPlayer, board) {
 function backpropagate(leafNode, winIncrement, simulatedWinner) {
     leafNode.winCount += winIncrement;
     leafNode.simulationCount += 1;
+
+    //FOR DEBUGGING, NO UTILITY:
+    if (winIncrement === 0) {
+        //loss
+        leafNode.losses++;
+    }
+    else if (winIncrement === .5) {
+        //draw
+        leafNode.draws++;
+    }
+
     if (leafNode.parent === null) {
         return
     }
@@ -101,23 +117,26 @@ function executeRound(rootNode, board) {
     _LASTSIMULATE.length = 0
 }
 
-function simulateGames(board, currentPlayer) {
+export function simulateGames(board, currentPlayer) {
     const rootNode = new MonteCarloTree(currentPlayer === 'X' ? 'O' : 'X');
     const startTime = Math.floor(Date.now() / 1000)
     let roundNum = 0;
     while (true) {
-        if (Math.floor(Date.now() / 1000) - startTime > THINKINGDURATION || roundNum > 2000 * Math.pow(9, board.depth-1)) { 
+        if (Math.floor(Date.now() / 1000) - startTime > THINKINGDURATION ||  roundNum > THINKINGROUNDNUMWEIGHT * 2000 * Math.pow(9, board.depth-1)) { 
             break;
         }
-        if (DEBUGMODE && roundNum % 1000 === 0) {
+        if (true && roundNum % 1000 === 0) {
             console.log("round: " + roundNum);
         }
         roundNum++;
         executeRound(rootNode, board);
     }
     const scores = {};
+    //sctructure is {%move : {wins: #, loss: #, draws: #}}
+    const moveWL = {}
+    rootNode.children.map((childNode) => { moveWL[childNode.move] = { wins: childNode.winCount, losses: childNode.losses, draws: childNode.draws }})
     rootNode.children.map((childNode) => { scores[childNode.move] = childNode.winCount / childNode.simulationCount });
-    return scores;
+    return { moveScores: scores, moveWL: moveWL };
 }
 
 function applyDifficultyToMoveset(scores, difficulty) {
@@ -133,7 +152,7 @@ function applyDifficultyToMoveset(scores, difficulty) {
 }
 
 export function getNextMove(board, currentPlayer, botDifficulty) {
-    const moveScores = simulateGames(board, currentPlayer)
+    const {moveScores} = simulateGames(board, currentPlayer)
     if (Object.keys(moveScores).length === 0) {
         return [];
     }

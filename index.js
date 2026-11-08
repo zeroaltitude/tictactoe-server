@@ -6,7 +6,8 @@ const GAMEIDLEN = 6;
 const BOTNAME = "tictactimmy";
 
 import { Game, isDuplicateId } from './datamanagement.js';
-import { getNextMove } from './montecarlotreesearch.js';
+import { getNextMove, simulateGames } from './montecarlotreesearch.js';
+import { objectToBoard } from './datamanagement.js';
 
 // Enable CORS with the defined options
 app.use(express.json());
@@ -201,3 +202,10 @@ app.put("/games/:game_id", (req, res) => {
         res.json(game);
     }
 });
+
+app.post("/games/analyze", (req, res) => {
+    const board = objectToBoard(req.body.board);
+    const { moveScores, moveWL } = simulateGames(board, req.body.botPlayingAs);
+    const sortedScores = Object.entries(moveScores).sort((a, b) => b[1] - a[1])
+    res.json({moveScores:sortedScores, moveWL:moveWL})
+})

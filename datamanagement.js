@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'node:path';
 const ROOTGAMEDIR = path.join(import.meta.dirname, 'state', 'games');
 
-function boardToObject(board) {
+export function boardToObject(board) {
   const obj = {
     depth: board.depth,
     row: board.row,
@@ -30,7 +30,7 @@ function boardToObject(board) {
   }
 }
 
-function objectToBoard(boardObj, fixActiveStatus = false, parentBoard = null) {
+export function objectToBoard(boardObj, fixActiveStatus = false, parentBoard = null) {
     const boardTree = new BoardTree(null, boardObj.depth, 0, 0);
     Object.assign(boardTree, boardObj)
     boardTree.isActive = fixActiveStatus ? boardObj.wonBy === '' : boardObj.isActive
@@ -55,6 +55,16 @@ function objectToBoard(boardObj, fixActiveStatus = false, parentBoard = null) {
         }
     }
     return boardTree
+}
+
+export function getBoardUsingMoves(gameDimension, moves) {
+    const board = new BoardTree(null, gameDimension, 0, 0)
+    const verifiedMoves = moves.slice(0, moves.length - 1);  
+    evaluateMovesOnBoardTree([], verifiedMoves, board, true)
+    if (!(moves.length === 0)) {
+        evaluateMoveOnBoardTree(moves.length % 2 === 0 ? 'O' : 'X', moves[moves.length - 1], board)
+    }
+    return board;
 }
 
 export function isDuplicateId(id) {
@@ -114,7 +124,7 @@ export class Game {
         if (setMovesTo.length !== 0) {
             //console.log(setMovesTo)
             this.moves = setMovesTo;
-            const newBoard = this.getBoardUsingStoredMoves();
+            const newBoard = getBoardUsingMoves(this.gameDimension, this.moves);
             this.boardObj = boardToObject(newBoard);
         }
         else {
@@ -126,15 +136,6 @@ export class Game {
     }
     getBoard() {
         return objectToBoard(this.boardObj);
-    }
-    getBoardUsingStoredMoves() {
-        const board = new BoardTree(null, this.gameDimension, 0, 0)
-        const verifiedMoves = this.moves.slice(0, this.moves.length - 1);  
-        evaluateMovesOnBoardTree([], verifiedMoves, board, true)
-        if (!(this.moves.length === 0)) {
-            evaluateMoveOnBoardTree(this.moves.length % 2 === 0 ? 'O' : 'X', this.moves[this.moves.length - 1], board)
-        }
-        return board;
     }
     checkMoveValidity(move) {
         const targetBoard = getTreeNodeForCoords(this.getBoard(), move);
