@@ -887,6 +887,94 @@ const D1BOARD = {
     ]
 }
 
+const D1BOARDBLANK = {
+    depth: 1,
+    row: 0,
+    column: 0,
+    wonBy: '',
+    isActive: true,
+    children: [
+        [
+            {
+                depth : 0,
+                row : 0, 
+                column : 0,
+                wonBy : '',
+                isActive : true,
+                children : 0
+            },
+            {
+                depth : 0,
+                row : 0, 
+                column : 1,
+                wonBy : '',
+                isActive : true,
+                children : 0
+            },
+            {
+                depth : 0,
+                row : 0, 
+                column : 2,
+                wonBy : '',
+                isActive : true,
+                children : 0
+            }
+        ],
+        [
+            {
+                depth : 0,
+                row : 1, 
+                column : 0,
+                wonBy : '',
+                isActive : true,
+                children : 0
+            },
+            {
+                depth : 0,
+                row : 1, 
+                column : 1,
+                wonBy : '',
+                isActive : true,
+                children : 0
+            },
+            {
+                depth : 0,
+                row : 1, 
+                column : 2,
+                wonBy : '',
+                isActive : true,
+                children : 0
+            }
+        ],
+        [
+            {
+                depth : 0,
+                row : 2, 
+                column : 0,
+                wonBy : '',
+                isActive : true,
+                children : 0
+            },
+            {
+                depth : 0,
+                row : 2, 
+                column : 1,
+                wonBy : '',
+                isActive : true,
+                children : 0
+            },
+            {
+                depth : 0,
+                row : 2, 
+                column : 2,
+                wonBy : '',
+                isActive : true,
+                children : 0
+            }
+        ]
+    ]
+}
+
 function objectToBoard(boardObj, parentBoard = null) {
     const boardTree = new BoardTree(null, boardObj.depth, 0, 0);
     Object.assign(boardTree, boardObj)
@@ -923,8 +1011,8 @@ function main() {
     //console.log(objectToBoard(D1BOARD))
     //console.log(scorePossibleWins(D2BOARD))
     const recommendedMoveList = [];
-    for (let i = 0; i < 1; i++) {
-        const recommendedMove = getNextMove(objectToBoard(D1BOARD), 'O', "insane")
+    for (let i = 0; i < 10; i++) {
+        const recommendedMove = getNextMove(objectToBoard(D1BOARDBLANK), 'O', "insane")
         recommendedMoveList.push(recommendedMove)
         console.log(recommendedMove)
     }

@@ -5,6 +5,8 @@ import { DEBUGMODE } from "./constants.js";
 
 const THINKINGDURATION = 100; // in seconds
 const THINKINGROUNDNUMWEIGHT = 1;
+const EXPLORATIONPARAM = Math.sqrt(2);
+const BETACONSTANT = 1;
 
 class MonteCarloTree {
     constructor(player, parent = null, move = null, depth = 0) {
@@ -16,6 +18,9 @@ class MonteCarloTree {
         this.children = [];
         this.parent = parent;
         this.isDead = false;
+        
+        this.RAVEWinCount = 0;
+        this.RAVESimulationCount = 0;
 
         //DEBUGGING ONLY, NO UTIL
         this.losses = 0;
@@ -23,12 +28,28 @@ class MonteCarloTree {
     }
 }
 
+
+
+const beta = (MCSims, RAVESims) => {
+    return ((RAVESims)/(MCSims+RAVESims+(4 * Math.pow(BETACONSTANT, 2) * MCSims * RAVESims)))
+}
+
+const MCScore = (winCount, simulationCount) => { return (winCount / simulationCount) }
+
+const RAVEScore = (RAVEWinCount, RAVESimulationCount) => { return (RAVEWinCount / RAVESimulationCount) }
+
+const explorationTerm = (simulationCount, parentSimulationCount) => { (EXPLORATIONPARAM * Math.sqrt(Math.log(parentSimulationCount) / simulationCount)) }
+
+const scoreUCB = (winCount, simulationCount, parentSimulationCount, RAVEWinCount, RAVESimulationCount) => {
+    return ( ((1 - beta(simulationCount, RAVESimulationCount)) * MCScore(winCount, simulationCount)) + ((beta(simulationCount, RAVESimulationCount)) * RAVEScore(RAVEWinCount, RAVESimulationCount)) + explorationTerm(simulationCount, parentSimulationCount))
+}
+
 function leafWalk(node, board) {
     if (node.children.length === 0) {
         return node
     }
     else {
-        const nodeScores = node.children.map((child) => {return (child.simulationCount === 0 ? Infinity : ((child.winCount / child.simulationCount) + (Math.sqrt(Math.log(node.simulationCount) / child.simulationCount))))})
+        const nodeScores = node.children.map((child) => {return (child.simulationCount === 0 ? Infinity : scoreUCB(child.winCount, child.simulationCount, node.simulationCount, node.RAVEWinCount, node.RAVESimulationCount))})
         let max = nodeScores[0];
         let indexOfMax = 0;
         for (let i = 1; i < nodeScores.length; i++) {
@@ -58,7 +79,8 @@ function selectAndExpand(rootNode, rootBoard) {
         return leaf;
     }
     for (const possibleMove of possibleMoves) {
-        leaf.children.push(new MonteCarloTree(nextPlayer, leaf, possibleMove, leaf.depth + 1))
+        const newNode = new MonteCarloTree(nextPlayer, leaf, possibleMove, leaf.depth + 1);
+        leaf.children.push(newNode);
     }
     const chosenMoveIndex = Math.floor(possibleMoves.length * Math.random());
     evaluateMoveOnBoardTree(nextPlayer, possibleMoves[chosenMoveIndex], rootBoard);
@@ -67,26 +89,39 @@ function selectAndExpand(rootNode, rootBoard) {
 
 const _LASTSIMULATE = [];
 
-function simulate(currentPlayer, board) {
+function simulate(currentPlayer, board, botToken, moveList = []) {
     if (board.wonBy !== '') {
-        return board.wonBy
+        return [board.wonBy, moveList]
     }
     else {
         const possibleMoves = getAvailableMoves(board);
         // if draw happens
         if (possibleMoves.length === 0) {
-            return '-';
+            return ['-', moveList];
         }
         const chosenMove = possibleMoves[Math.floor(possibleMoves.length * Math.random())];
         _LASTSIMULATE.push(chosenMove)
         evaluateMoveOnBoardTree(currentPlayer, chosenMove, board);
-        return simulate(currentPlayer === 'X' ? 'O' : 'X', board);
+        if (currentPlayer === botToken) {
+            moveList.push(chosenMove);
+        }
+        return simulate(currentPlayer === 'X' ? 'O' : 'X', board, botToken, moveList);
     }
 }
 
-function backpropagate(leafNode, winIncrement, simulatedWinner) {
+function backpropagate(leafNode, winIncrement, simulatedWinner, botRAVEMoveList, botToken) {
+    const moveListToCheck = botRAVEMoveList.slice(0, botRAVEMoveList.length-1)
+    //MC
     leafNode.winCount += winIncrement;
     leafNode.simulationCount += 1;
+
+    //RAVE
+    for (let node of leafNode.children) {
+        if (moveListToCheck.some(move => _.isEqual(move, node.move))) {
+            node.RAVEWinCount += winIncrement;
+            node.RAVESimulationCount++;
+        }
+    }
 
     //FOR DEBUGGING, NO UTILITY:
     if (winIncrement === 0) {
@@ -102,7 +137,10 @@ function backpropagate(leafNode, winIncrement, simulatedWinner) {
         return
     }
     else {
-        backpropagate(leafNode.parent, winIncrement === 0.5 ? 0.5 : leafNode.player === simulatedWinner ? 0 : 1, simulatedWinner)
+        if (leafNode.player === botToken) {
+            botRAVEMoveList.push(leafNode.move);
+        }
+        backpropagate(leafNode.parent, winIncrement === 0.5 ? 0.5 : leafNode.player === simulatedWinner ? 0 : 1, simulatedWinner, botRAVEMoveList)
     }
 }
 
@@ -112,8 +150,8 @@ function executeRound(rootNode, board) {
     if (!leaf.isDead && (rootBoard.wonBy !== '' || getAvailableMoves(rootBoard).length === 0)) {
         leaf.isDead = true;
     }
-    let simulatedWinner = leaf.isDead ? rootBoard.wonBy === "" ? '-' : rootBoard.wonBy : simulate(leaf.player, rootBoard);
-    backpropagate(leaf, simulatedWinner === '-' ? 0.5 : leaf.player === simulatedWinner ? 1 : 0, simulatedWinner)
+    let [simulatedWinner, botRAVEMoveList] = leaf.isDead ? rootBoard.wonBy === "" ? ['-', []] : [rootBoard.wonBy, []] : simulate(leaf.player, rootBoard, rootNode.player);
+    backpropagate(leaf, simulatedWinner === '-' ? 0.5 : leaf.player === simulatedWinner ? 1 : 0, simulatedWinner, botRAVEMoveList, rootNode.player)
     _LASTSIMULATE.length = 0
 }
 
@@ -135,7 +173,7 @@ export function simulateGames(board, currentPlayer) {
     //sctructure is {%move : {wins: #, loss: #, draws: #}}
     const moveWL = {}
     rootNode.children.map((childNode) => { moveWL[childNode.move] = { wins: childNode.winCount, losses: childNode.losses, draws: childNode.draws }})
-    rootNode.children.map((childNode) => { scores[childNode.move] = childNode.winCount / childNode.simulationCount });
+    rootNode.children.map((childNode) => { scores[childNode.move] = childNode.simulationCount });
     return { moveScores: scores, moveWL: moveWL };
 }
 
